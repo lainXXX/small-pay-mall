@@ -1,11 +1,13 @@
 package com.rem.service.impl;
 
+import com.google.gson.Gson;
 import com.rem.context.ThreadContext;
 import com.rem.req.WXQrCodeReq;
 import com.rem.res.AccessTokenRes;
 import com.rem.res.WXQrCodeRes;
 import com.rem.service.IWXLonginService;
 import com.rem.service.IWXService;
+import com.rem.vo.WeixinTemplateMessageVO;
 import com.rem.weixin.message.TextMessage;
 import com.rem.weixin.properties.WXProperties;
 import com.rem.weixin.utils.WXUtils;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import retrofit2.Call;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -24,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 public class WXLoginServiceImpl implements IWXLonginService {
 
     private String credential = "client_credential";
+
+    @Value("${wx.template_id}")
+    private String template_id;
 
     @Autowired
     private IWXService wxService;
@@ -86,7 +92,7 @@ public class WXLoginServiceImpl implements IWXLonginService {
     }
 
     @Override
-    public void getLoginStatus(String ticket, String openid) {
+    public String getLoginStatus(String ticket, String openid) {
 //        扫描二维码后用户会通过post请求推送一个事件 包括ticket和 FromUserName	发送方账号 也就是openid
 //        把这个信息存入缓存 用户登录验证
         redisTemplate.opsForValue().set(ticket, openid, 30, TimeUnit.SECONDS);
@@ -94,24 +100,26 @@ public class WXLoginServiceImpl implements IWXLonginService {
         if (accessToken == null) {
             throw new RuntimeException("token为空");
         }
-
+        return accessToken;
     }
 
     @Override
-    public String post(String xmlString) {
-        try {
+    public String post(String xmlString) throws IOException {
             TextMessage message = (TextMessage) WXUtils.XMLToBean(xmlString, TextMessage.class);
-            log.info("客户端发送的信息 {}", message);
             String ticket = message.getTicket();
             if (ticket != null) {
-                getLoginStatus(ticket, message.getFromUserName());
-                return WXUtils.buildMessage(message.getToUserName(), message.getFromUserName(), "扫描二维码成功");
-            }
-            return WXUtils.buildMessage(message.getToUserName(), message.getFromUserName(), "欢迎来到本公众号");
-        } catch (Exception e) {
-            log.info("发送给客户端信息失败", e);
-            return "";
+                String accessToken = getLoginStatus(ticket, message.getFromUserName());
+                WeixinTemplateMessageVO wxTemplateDTO = new WeixinTemplateMessageVO(message.getFromUserName(), template_id);
+                wxTemplateDTO.put("user_id", message.getFromUserName());
+                wxTemplateDTO.put("login_time", LocalDateTime.now().toString());
+                wxTemplateDTO.put("first", "登录成功");
+                Gson gson = new Gson();
+                String json = gson.toJson(wxTemplateDTO, wxTemplateDTO.getClass());
+                log.info("{}}", json);
+                Call<Void> call = wxService.sendMessage(accessToken, wxTemplateDTO);
+                call.execute();
+                return "";
         }
+        return WXUtils.buildMessage(message.getToUserName(), message.getFromUserName(), "欢迎来到本公众号");
     }
-
 }

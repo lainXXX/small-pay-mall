@@ -31,6 +31,7 @@ wx:
   appSecret: ccdbcb6a93b444f1ebc3bdc6625dc18a #app密钥
   token: rem000 #自己设置的接口配置信息Token
   aesKeyUrl: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${wx.appID}&secret=${wx.appSecret}
+  template_id: Ax3HCCuHEtFNhqxDNyl99-rQiAJfFSEk3AbI1oZBRRM
 alipay: #支付宝相关的配置
   app_id: 9021000141645053
   #应用私钥

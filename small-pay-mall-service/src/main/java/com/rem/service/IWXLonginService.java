@@ -9,7 +9,7 @@ public interface IWXLonginService {
 
     String checkLogin(String ticket);
 
-    void getLoginStatus(String ticket, String openid);
+    String getLoginStatus(String ticket, String openid);
 
-    String post(String xmlString);
+    String post(String xmlString) throws IOException;
 }
