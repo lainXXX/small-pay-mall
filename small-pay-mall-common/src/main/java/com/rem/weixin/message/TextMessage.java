@@ -13,7 +13,7 @@ public class TextMessage {
     //    接收方账号（收到的OpenID）
     @XStreamAlias("ToUserName")
     private String toUserName;
-    //    开发者微信号1
+    //    开发者微信号
     @XStreamAlias("FromUserName")
     private String fromUserName;
     //    消息创建时间
@@ -28,6 +28,12 @@ public class TextMessage {
     //    事件类型，subscribe SCAN 等
     @XStreamAlias("Event")
     private String event;
+    @XStreamAlias("MsgId")
+    private String msgId;
+    @XStreamAlias("MsgID")
+    private String MsgID;
+    @XStreamAlias("Status")
+    private String status;
     //    事件KEY值，是一个32位无符号整数，即创建二维码时的二维码scene_id
     @XStreamAlias("EventKey")
     private String eventKey;

@@ -4,6 +4,7 @@ package com.rem.service;
 import com.rem.req.WXQrCodeReq;
 import com.rem.res.AccessTokenRes;
 import com.rem.res.WXQrCodeRes;
+import com.rem.vo.WeixinTemplateMessageVO;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -36,5 +37,15 @@ public interface IWXService {
     Call<WXQrCodeRes> getQrCode(@Query("access_token") String accessToken,
                                 @Body WXQrCodeReq wxQrCodeReq);
 
+    /**
+     * 发送微信公众号模板消息
+     * 文档：https://mp.weixin.qq.com/debug/cgi-bin/readtmpl?t=tmplmsg/faq_tmpl
+     *
+     * @param accessToken              getToken 获取的 token 信息
+     * @param weixinTemplateMessageVO 入参对象
+     * @return 应答结果
+     */
+    @POST("cgi-bin/message/template/send")
+    Call<Void> sendMessage(@Query("access_token") String accessToken, @Body WeixinTemplateMessageVO weixinTemplateMessageVO);
 
 }

@@ -31,7 +31,7 @@ public class PayOrderController {
             return Response.<String>builder()
                     .code(Constants.ResponseCode.SUCCESS.getCode())
                     .info(Constants.ResponseCode.SUCCESS.getInfo())
-                    .data(orderRes.getOrderId())
+                    .data(orderRes.getPayUrl())
                     .build();
 
         } catch (AlipayApiException e) {
@@ -45,9 +45,8 @@ public class PayOrderController {
 
     @PostMapping("/notify")
     public String payNotify(HttpServletRequest request) throws AlipayApiException {
-        log.info("支付回调，消息接收 {}", request.getParameter("trade_status"));
         String message = payOrderService.payNotify(request);
-        log.info("回调处理结果 {}", message);
+        log.info("支付结果 {}", message);
         return message;
     }
 

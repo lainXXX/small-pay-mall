@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 
 @RestController
 @RequestMapping("/wx/portal")
@@ -37,9 +39,12 @@ public class WXPortalController {
 
     @PostMapping("/receive")
     public String post(@RequestBody String xmlString) {
-        log.info("开始解析xml文件");
-        String message = loginService.post(xmlString);
-        return message;
+        try {
+            String message = loginService.post(xmlString);
+            return message;
+        } catch (IOException e) {
+            log.error("接收微信公众号信息请求 失败 {}",  e);
+            return "";
+        }
     }
-
 }

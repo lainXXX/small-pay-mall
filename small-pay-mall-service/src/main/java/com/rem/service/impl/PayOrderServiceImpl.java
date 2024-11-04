@@ -79,9 +79,11 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
                 .set(PayOrder::getOrderTime, LocalDateTime.now())
                 .set(PayOrder::getPayUrl, payUrl)
                 .set(PayOrder::getUpdateTime, LocalDateTime.now())
+                .set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode())
                 .eq(PayOrder::getOrderId, orderId)
                 .update();
         return PayOrderRes.builder()
+                .userId(order.getUserId())
                 .orderId(orderId)
                 .payUrl(payUrl)
                 .build();
