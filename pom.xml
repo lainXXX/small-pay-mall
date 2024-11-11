@@ -20,7 +20,6 @@
         <module>small-pay-mall-common</module>
         <module>small-pay-mall-domain</module>
         <module>small-pay-mall-service</module>
-        <module>small-pay-mall-controller</module>
         <module>small-pay-mall-mapper</module>
         <module>small-pay-mall-web</module>
     </modules>

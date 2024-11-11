@@ -37,6 +37,11 @@ public class PayOrder implements Serializable {
     private String itemName;
 
     /**
+     * 商品图片url
+     */
+    private String itemImage;
+
+    /**
      * 订单id
      */
     private String orderId;
@@ -75,6 +80,16 @@ public class PayOrder implements Serializable {
      * 更新时间
      */
     private LocalDateTime updateTime;
+
+    /**
+     * 退款时间
+     */
+    private LocalDateTime refundTime;
+
+    /**
+     * 退款原因
+     */
+    private String refundReason;
 
     private static final long serialVersionUID = 1L;
 }

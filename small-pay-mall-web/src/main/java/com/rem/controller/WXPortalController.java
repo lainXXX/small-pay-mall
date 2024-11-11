@@ -1,7 +1,7 @@
 package com.rem.controller;
 
 
-import com.rem.service.IWXLonginService;
+import com.rem.service.IWXLoginService;
 import com.rem.weixin.utils.WXUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class WXPortalController {
     private String token;
 
     @Autowired
-    private IWXLonginService loginService;
+    private IWXLoginService loginService;
 
     /**
      * @param signature 微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。
@@ -38,13 +38,14 @@ public class WXPortalController {
     }
 
     @PostMapping("/receive")
-    public String post(@RequestBody String xmlString) {
-        try {
-            String message = loginService.post(xmlString);
-            return message;
-        } catch (IOException e) {
-            log.error("接收微信公众号信息请求 失败 {}",  e);
-            return "";
-        }
+    public String post(@RequestBody String xmlString) throws IOException {
+        String message = loginService.post(xmlString);
+        return message;
     }
+
+    @GetMapping("/hi")
+    public String hi() {
+        return "hi";
+    }
+
 }

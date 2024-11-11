@@ -2,11 +2,12 @@ package com.rem.task;
 
 
 import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.rem.constants.Constants;
+import com.rem.controller.XXXController;
 import com.rem.entity.PayOrder;
 import com.rem.service.IPayOrderService;
+import io.jsonwebtoken.lang.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,14 +16,16 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Slf4j
-//@Component()
+@Component()
 public class PayOrderTask {
 
     @Autowired
     private IPayOrderService payOrderService;
+    @Autowired
+    private XXXController xXXController;
 
 
-    @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     public void orderCloseTask() {
         log.info("任务: 订单30分钟未支付自动关闭");
 //        查询需要关闭的订单集合
@@ -30,7 +33,7 @@ public class PayOrderTask {
                 .eq(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode())
                 .apply("NOW() > create_time + INTERVAL 30 MINUTE")
                 .list();
-        if (closeOrderList == null || closeOrderList.size() == 0) {
+        if (Collections.isEmpty(closeOrderList)) {
             log.info("执行完毕 没有未处理订单");
             return;
         }
@@ -40,10 +43,9 @@ public class PayOrderTask {
             boolean b = payOrderService.changeOrderStatus(order.getOrderId(), Constants.OrderStatusEnum.CLOSE.getCode());
             log.info("orderId {} result : {}", order.getOrderId(), b);
         });
-        log.info("订单关闭执行完毕");
     }
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void OrderWaitTask() {
         log.info("任务 处理掉单订单");
 //        查询掉单的订单 也就是创建订单但是却没有进入支付页面的订单
@@ -51,7 +53,7 @@ public class PayOrderTask {
                 .eq(PayOrder::getStatus, Constants.OrderStatusEnum.CREATE.getCode())
                 .apply("NOW() > create_time + INTERVAL 10 MINUTE")
                 .list();
-        if (failOrderList == null || failOrderList.size() == 0) {
+        if (Collections.isEmpty(failOrderList)) {
             log.info("执行完毕 没有掉单订单");
             return;
         }
@@ -68,6 +70,5 @@ public class PayOrderTask {
                 payOrderService.changeOrderStatus(order.getOrderId(), Constants.OrderStatusEnum.PAY_SUCCESS.getCode());
             }
         });
-        log.info("处理掉单执行完毕");
     }
 }

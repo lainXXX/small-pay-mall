@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rem Mall Login</title>
+    <link rel="icon" href="images/icon.jpeg" type="image/jpeg">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+            font-family: Arial, sans-serif;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 360px;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .qr-code {
+            margin-bottom: 20px;
+        }
+        .qr-code img {
+            max-width: 100%;
+            height: auto;
+        }
+        .login-container p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .login-container button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .login-container button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+
+<body>
+<div class="login-container">
+    <h2>二维码登录</h2>
+    <div class="qr-code">
+        <!-- 这里将显示二维码 -->
+        <img id="qrCodeImage" src="images/placeholder.jpeg" alt="登录二维码">
+    </div>
+    <p>请使用微信扫描二维码以登录</p>
+    <button onclick="handleLogin()">登录</button>
+    <div id="success-message" class="success-message" style="display: none; color: green; margin-top: 20px;">
+        登录成功！
+    </div>
+</div>
+
+<!-- 脚注 -->
+<footer style="position: fixed; bottom: 0; width: 100%; text-align: center; padding: 10px; font-size: 14px;">
+    <p>&copy; Develop By Rem</p>
+</footer>
+<script>
+    function handleLogin() {
+        // 获取二维码 ticket
+        fetch('http://localhost:19090/api/wx/login/qrcode/create')
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === "0000") {
+                    const {ticket, loginKey} = data.data;
+                    // 获取二维码图片元素
+                    const qrCodeImage = document.getElementById('qrCodeImage');
+                    // 更新二维码图片的src属性为登录二维码图片的路径
+                    qrCodeImage.src = `https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${encodeURIComponent(ticket)}`; // 替换为实际的登录二维码图片路径
+
+                    // 隐藏登录按钮
+                    const loginButton = document.querySelector('.login-container button');
+                    loginButton.style.display = 'none';
+
+                    // 开始轮询检查登录状态
+                    const intervalId = setInterval(() => {
+                        checkLoginStatus(loginKey, intervalId);
+                    }, 3000); // 每3秒检查一次
+                } else {
+                    console.error('获取二维码 ticket 失败:', data.info);
+                }
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+            });
+
+        function checkLoginStatus(loginKey, intervalId) {
+            fetch(`http://localhost:19090/api/wx/login/check?loginKey=${loginKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === "0000") {
+                        console.info("login success");
+                        // 停止轮询
+                        clearInterval(intervalId);
+                        // 保存登录 token 到 cookie，设置有效期为30天
+                        setCookie('openid', data.data, 1);
+                        // 在这里可以重定向到登录后的页面
+                        document.getElementById('success-message').style.display = 'block';
+                        // 在这里可以重定向到登录后的页面
+                        setTimeout(() => {
+                            window.location.href = 'index.html'; // 假设登录成功后跳转到首页
+                            // 等待页面加载完成后，刷新页面
+                            window.addEventListener('load', function() {
+                                location.reload();
+                            });
+                        }, 2000); // 延迟2秒再跳转
+
+                    } else {
+                        console.info("login wait");
+                    }
+                })
+                .catch(error => {
+                    console.error('请求失败:', error);
+                });
+        }
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+    }
+
+
+</script>
+</body>
+</html>

@@ -33,6 +33,7 @@ public class AppException extends RuntimeException {
         super.initCause(cause);
     }
 
+
     public AppException(String code, String message) {
         this.code = code;
         this.info = message;

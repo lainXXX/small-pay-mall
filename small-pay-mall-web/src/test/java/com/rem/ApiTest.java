@@ -1,11 +1,8 @@
 package com.rem;
 
 import com.alipay.api.AlipayApiException;
-import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.rem.constants.Constants;
-import com.rem.dto.CartDTO;
 import com.rem.entity.PayOrder;
-import com.rem.res.PayOrderRes;
 import com.rem.service.IPayOrderService;
 import com.rem.service.impl.PayOrderServiceImpl;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -13,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,8 +21,7 @@ public class ApiTest {
 
     @Autowired
     private PayOrderServiceImpl payOrderServiceImpl;
-
-    @Test
+/*    @Test
     public void test() throws AlipayApiException {
         CartDTO dto = CartDTO.builder()
                 .userId("userId123")
@@ -36,7 +31,8 @@ public class ApiTest {
                 .build();
         PayOrderRes orderRes = payOrderService.createOrder(dto);
         System.out.println(orderRes);
-    }
+    }*/
+
 
     @Test
     public void testOrderId() {

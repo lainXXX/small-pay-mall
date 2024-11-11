@@ -1,6 +1,6 @@
 package com.rem.config;
 
-import com.rem.service.IWXService;
+import com.rem.service.IWXApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +21,8 @@ public class Retrofit2Config {
     }
 
     @Bean
-    public IWXService WXServiceConfig(Retrofit retrofit) {
-        return retrofit.create(IWXService.class);
+    public IWXApiService WXServiceConfig(Retrofit retrofit) {
+        return retrofit.create(IWXApiService.class);
     }
 
 }

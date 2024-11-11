@@ -1,21 +1,23 @@
 package com.rem.service;
 
 import com.alipay.api.AlipayApiException;
-import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rem.dto.CartDTO;
+import com.rem.dto.RefundOrderDTO;
 import com.rem.entity.PayOrder;
-import com.rem.res.PayOrderRes;
+import com.rem.dto.PayOrderRes;
+import com.rem.vo.PayOrderVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
-* @author aaa
-* @description 针对表【pay_order】的数据库操作Service
-* @createDate 2024-10-29 00:45:46
-*/
+ * @author aaa
+ * @description 针对表【pay_order】的数据库操作Service
+ * @createDate 2024-10-29 00:45:46
+ */
 public interface IPayOrderService extends IService<PayOrder> {
 
     PayOrderRes createOrder(CartDTO cartDTO) throws AlipayApiException;
@@ -25,4 +27,10 @@ public interface IPayOrderService extends IService<PayOrder> {
     AlipayTradePagePayResponse doPay(String orderId, BigDecimal totalAmount, String itemName) throws AlipayApiException;
 
     boolean changeOrderStatus(String orderId, String code);
+
+    List<PayOrderVO> searchPayOrder(String userId);
+
+    String refund(RefundOrderDTO refundOrderDTO);
+
+    void remind(String orderId);
 }

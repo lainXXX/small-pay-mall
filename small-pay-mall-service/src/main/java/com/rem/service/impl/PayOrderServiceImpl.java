@@ -3,19 +3,29 @@ package com.rem.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.domain.AlipayTradeRefundModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.rem.config.AlipayConfig;
 import com.rem.constants.Constants;
 import com.rem.dto.CartDTO;
+import com.rem.dto.RefundOrderDTO;
 import com.rem.entity.PayOrder;
 import com.rem.mapper.PayOrderMapper;
-import com.rem.res.PayOrderRes;
+import com.rem.dto.PayOrderRes;
+import com.rem.message.SubscriberMessage;
 import com.rem.service.IPayOrderService;
+import com.rem.service.IWXApiService;
+import com.rem.service.ItemService;
+import com.rem.vo.PayOrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -23,8 +33,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author aaa
@@ -43,52 +53,57 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
-
+    /**
+     * 创建订单信息
+     *
+     * @param cartDTO 传入的购物信息
+     * @return
+     * @throws AlipayApiException
+     */
     @Override
     public PayOrderRes createOrder(CartDTO cartDTO) throws AlipayApiException {
         if (cartDTO == null) {
             throw new AlipayApiException("购物车为空");
         }
-        PayOrder unpaidOrder = lambdaQuery().eq(PayOrder::getUserId, cartDTO.getUserId())
-                .eq(PayOrder::getItemId, cartDTO.getItemId())
-                .one();
-        if (unpaidOrder != null && Constants.OrderStatusEnum.PAY_WAIT.getCode().equals(unpaidOrder.getStatus())) {
+        PayOrder unpaidOrder = lambdaQuery().eq(PayOrder::getUserId, cartDTO.getUserId()).eq(PayOrder::getItemId, cartDTO.getItemId()).apply("status = 'CREATE' or 'PAY_WAIT'").one();
+        BigDecimal amount = BigDecimal.valueOf(Double.valueOf(cartDTO.getTotalAmount()));
+/*  废案
+      if (unpaidOrder != null && Constants.OrderStatusEnum.PAY_WAIT.getCode().equals(unpaidOrder.getStatus())) {
             log.info("存在未支付订单, 订单支付id{}", unpaidOrder.getItemId());
             return buildPayOrderRes(unpaidOrder);
         } else if ((unpaidOrder != null && Constants.OrderStatusEnum.CREATE.getCode().equals(unpaidOrder.getStatus()))) {
             log.info("存在掉单订单, 订单id{}", unpaidOrder.getUserId());
             return buildPayOrderRes(unpaidOrder);
-        }
+        }*/
+//        利用时间戳和随机数生成一个16位的订单号
         String orderId = System.currentTimeMillis() + RandomStringUtils.randomNumeric(3);
-        PayOrder order = PayOrder.builder()
-                .userId(cartDTO.getUserId())
-                .orderId(orderId)
-                .itemId(cartDTO.getItemId())
-                .itemName(cartDTO.getItemName())
-                .totalAmount(cartDTO.getTotalAmount())
-                .createTime(LocalDateTime.now())
-                .updateTime(LocalDateTime.now())
-                .status(Constants.OrderStatusEnum.CREATE.getCode())
-                .build();
+        PayOrder order = PayOrder.builder().
+                userId(cartDTO.getUserId()).
+                orderId(orderId).
+                itemId(cartDTO.getItemId()).
+                itemName(cartDTO.getItemName()).
+                itemImage(cartDTO.getItemImage()).
+                totalAmount(amount).
+                createTime(LocalDateTime.now()).
+                updateTime(LocalDateTime.now()).
+                status(Constants.OrderStatusEnum.CREATE.getCode()).
+                build();
         this.save(order);
 //        在创建订单 也就是save()后 执行doPay()方法可能失败 就会存在掉单 后续可以通过轮询支付状态为CREATE的订单重新发起支付
-        AlipayTradePagePayResponse response = doPay(orderId, cartDTO.getTotalAmount(), cartDTO.getItemName());
+        AlipayTradePagePayResponse response = doPay(orderId, amount, cartDTO.getItemName());
 //        获取支付宝表单页面url
         String payUrl = response.getBody();
-        this.lambdaUpdate()
-                .set(PayOrder::getOrderTime, LocalDateTime.now())
-                .set(PayOrder::getPayUrl, payUrl)
-                .set(PayOrder::getUpdateTime, LocalDateTime.now())
-                .set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode())
-                .eq(PayOrder::getOrderId, orderId)
-                .update();
-        return PayOrderRes.builder()
-                .userId(order.getUserId())
-                .orderId(orderId)
-                .payUrl(payUrl)
-                .build();
+        this.lambdaUpdate().set(PayOrder::getOrderTime, LocalDateTime.now()).set(PayOrder::getPayUrl, payUrl).set(PayOrder::getUpdateTime, LocalDateTime.now()).set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode()).eq(PayOrder::getOrderId, orderId).update();
+        return PayOrderRes.builder().userId(order.getUserId()).orderId(orderId).payUrl(payUrl).build();
     }
 
+    /**
+     * 支付成功后的通知及后续处理
+     *
+     * @param request http请求
+     * @return
+     * @throws AlipayApiException
+     */
     @Override
     public String payNotify(HttpServletRequest request) throws AlipayApiException {
         if (!request.getParameter("trade_status").equals("TRADE_SUCCESS")) {
@@ -113,17 +128,21 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
             return "false";
         }
 //        修改状态
-        this.lambdaUpdate()
-                .set(PayOrder::getPayTime, LocalDateTime.now())
-                .set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_SUCCESS.getCode())
-                .set(PayOrder::getUpdateTime, LocalDateTime.now())
-                .eq(PayOrder::getOrderId, tradeNo)
-                .update();
+        this.lambdaUpdate().set(PayOrder::getPayTime, LocalDateTime.now()).set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_SUCCESS.getCode()).set(PayOrder::getUpdateTime, LocalDateTime.now()).eq(PayOrder::getOrderId, tradeNo).update();
 
         redisTemplate.convertAndSend("pay_success", tradeNo); // 发布消息到 "myChannel"
         return "success";
     }
 
+    /**
+     * 创建支付请求
+     *
+     * @param orderId
+     * @param totalAmount
+     * @param itemName
+     * @return
+     * @throws AlipayApiException
+     */
     public AlipayTradePagePayResponse doPay(String orderId, BigDecimal totalAmount, String itemName) throws AlipayApiException {
 //        创建一个支付请求 设置请求参数
         AlipayTradePagePayRequest alipayRequest = new AlipayTradePagePayRequest();
@@ -141,21 +160,104 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
         return response;
     }
 
+    /**
+     * 订单状态修改
+     *
+     * @param orderId
+     * @param status
+     * @return
+     */
     @Override
     public boolean changeOrderStatus(String orderId, String status) {
-            return this.lambdaUpdate()
-                    .set(PayOrder::getStatus, status)
-                    .set(PayOrder::getUpdateTime, LocalDateTime.now())
-                    .eq(PayOrder::getOrderId, orderId)
-                    .update();
+        return this.lambdaUpdate().set(PayOrder::getStatus, status).set(PayOrder::getUpdateTime, LocalDateTime.now()).eq(PayOrder::getOrderId, orderId).update();
     }
 
+    /**
+     * 根据userId返回用户订单集合
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<PayOrderVO> searchPayOrder(String userId) {
+        List<PayOrder> list = this.lambdaQuery()
+                .eq(PayOrder::getUserId, userId)
+                .orderByDesc(PayOrder::getCreateTime)
+                .list();
+        List<PayOrderVO> PayOrderVOList = list.
+                stream().
+                map(order -> {
+                    PayOrderVO payOrderVO = new PayOrderVO();
+                    BeanUtils.copyProperties(order, payOrderVO);
+                    return payOrderVO;
+                }).
+                collect(Collectors.toList());
+        return PayOrderVOList;
+    }
+
+    @Override
+    public String refund(RefundOrderDTO refundOrderDTO) {
+        if (refundOrderDTO == null) {
+            return null;
+        }
+        String userId = refundOrderDTO.getUserId();
+        String orderId = refundOrderDTO.getOrderId();
+        String itemId = refundOrderDTO.getItemId();
+        String itemName = refundOrderDTO.getItemName();
+        String amount = refundOrderDTO.getAmount();
+        String reason = refundOrderDTO.getReason();
+        // 创建退款请求的参数
+        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+        AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+        model.setOutTradeNo(orderId); // 商户订单号
+//        model.setTradeNo("alipay-trade-id-12345"); // 支付宝交易号
+        model.setRefundAmount(amount); // 退款金额（单位：元）
+        model.setRefundReason(reason); // 退款原因
+//        model.setOutRequestNo("refund-001"); // 退款请求号，部分退款时使用
+        request.setBizModel(model);
+
+        // 发起退款请求
+        try {
+//            获取退款操作后的响应对象 方便获取退款返回的信息
+            AlipayTradeRefundResponse response = alipayClient.execute(request);
+            String code = response.getCode();
+            if ("10000".equals(code)) {
+                SubscriberMessage subscriberMessage = SubscriberMessage.builder()
+                        .userId(userId)
+                        .itemId(itemId)
+                        .amount(amount)
+                        .reason(reason)
+                        .itemName(itemName)
+                        .orderId(orderId)
+                        .build();
+                String message = new Gson().toJson(subscriberMessage);
+                redisTemplate.convertAndSend("refund_success", message);
+            }
+            return code;
+        } catch (AlipayApiException e) {
+            log.info("退款操作异常 {}", e.getMessage());
+            return "";
+        }
+    }
+
+    //    提醒发货本应该不这样设计 但是本项目不涉及商家端 故简单实现 可以使用webSocket等方式实现
+    @Override
+    public void remind(String orderId) {
+        this.lambdaUpdate()
+                .set(PayOrder::getUpdateTime, LocalDateTime.now())
+                .set(PayOrder::getStatus, Constants.OrderStatusEnum.DEAL_DONE.getCode())
+                .eq(PayOrder::getOrderId, orderId)
+                .update();
+    }
+
+    /**
+     * 返回未支付订单部分信息
+     *
+     * @param unpaidOrder 未支付订单
+     * @return
+     */
     private PayOrderRes buildPayOrderRes(PayOrder unpaidOrder) {
-        return PayOrderRes.builder()
-                .orderId(unpaidOrder.getOrderId())
-                .userId(unpaidOrder.getUserId())
-                .payUrl(unpaidOrder.getPayUrl())
-                .build();
+        return PayOrderRes.builder().orderId(unpaidOrder.getOrderId()).userId(unpaidOrder.getUserId()).payUrl(unpaidOrder.getPayUrl()).build();
     }
 
 }

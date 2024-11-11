@@ -2,4 +2,4 @@ spring:
   config:
     name: small-pay-mall
   profiles:
-    active: dev
+    active: prod

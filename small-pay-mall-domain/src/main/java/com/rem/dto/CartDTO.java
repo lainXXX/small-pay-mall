@@ -1,18 +1,18 @@
 package com.rem.dto;
 
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
-
 @Data
-@Builder
 public class CartDTO {
-
-    public String userId;
-    public String itemId;
-    public String itemName;
-    public BigDecimal totalAmount;
-
+    @JsonProperty("userId")
+    private String userId;
+    @JsonProperty("itemId")
+    private String itemId;
+    @JsonProperty("itemName")
+    private String itemName;
+    @JsonProperty("itemImage")
+    private String itemImage;
+    @JsonProperty("totalAmount")
+    private String totalAmount;
 }

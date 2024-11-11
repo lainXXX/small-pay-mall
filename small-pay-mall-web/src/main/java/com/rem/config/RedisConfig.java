@@ -1,6 +1,6 @@
 package com.rem.config;
 
-import com.rem.listener.PaySuccessListener;
+import com.rem.listener.PayListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -26,10 +26,11 @@ public class RedisConfig {
 
     @Bean
     public RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-                                                   PaySuccessListener subscriber) {
+                                                   PayListener subscriber) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(subscriber, new ChannelTopic("pay_success")); // 订阅 "myChannel"
+        container.addMessageListener(subscriber, new ChannelTopic("pay_success"));
+        container.addMessageListener(subscriber, new ChannelTopic("refund_success"));
         return container;
     }
 }

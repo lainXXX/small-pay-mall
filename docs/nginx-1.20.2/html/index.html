@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rem Mall</title>
+    <link rel="icon" href="images/icon.jpeg" type="image/jpeg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+    <h1>Rem Mall</h1>
+    <div class="user-auth">
+        <span id="userDisplay"></span>
+        <div id="userInfo" class="user-info" style="display: none;">
+            <!-- 用户信息内容 -->
+        </div>
+        <a href="login.html" id="loginBtn">登录</a>
+        <a href="#" id="logoutBtn" style="display:none;">退出登录</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="items">
+        <!-- 商品将通过JavaScript动态插入到这里 -->
+    </div>
+</div>
+
+<footer>
+    <p>测试账号: xqwaiw7622@sandbox.com </p>
+    <p>统一登录和支付密码: 111111</p>
+    <p>&copy; Develop By Rem</p>
+</footer>
+
+
+<script>
+
+    let openid;
+
+    // 页面加载时执行
+    document.addEventListener('DOMContentLoaded', function () {
+        // 检查Cookie中的登录状态
+        openid = getCookie(`openid`);
+        // 当DOM完全加载后执行
+        updateAuthDisplay();
+    });
+
+
+    logoutBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        deleteCookie("openid");
+        window.location.reload(); // 显式刷新页面
+    });
+
+
+    function updateAuthDisplay() {
+        if (openid != null) {
+            userDisplay.textContent = `订单管理`;
+            userDisplay.style.cursor = 'pointer';
+            loginBtn.style.display = 'none';
+            logoutBtn.style.display = 'inline';
+            // 添加点击事件监听器，实现点击跳转
+            userDisplay.addEventListener('click', function () {
+                // 在这里指定跳转的URL
+                window.location.href = 'orderManager.html'; // 将URL替换为你希望跳转到的页面
+            });
+        } else {
+            userDisplay.textContent = '';
+            loginBtn.style.display = 'inline';
+            logoutBtn.style.display = 'none';
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const url = 'http://localhost:19090/api/item/show';
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const itemsContainer = document.querySelector('.items');
+                if (Array.isArray(data.data)) {
+                    data.data.forEach(item => {
+                        displayItem(item, itemsContainer);
+                    });
+                } else {
+                    throw new Error('Data format is incorrect, expected an array of items');
+                }
+            })
+            .catch(error => {
+                console.error('无法加载商品数据:', error);
+            });
+    });
+    function displayItem(item, itemsContainer) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+        itemDiv.setAttribute('data-price', item.amount);
+        itemDiv.setAttribute('data-name', item.itemName);
+        itemDiv.setAttribute('data-id', item.itemId);
+        const img = document.createElement('img');
+        img.src = item.itemImage;
+        img.alt = item.itemName;
+        itemDiv.appendChild(img);
+        const h2 = document.createElement('h2');
+        h2.textContent = item.itemName;
+        itemDiv.appendChild(h2);
+        const priceP = document.createElement('p');
+        priceP.textContent = '价格: $' + item.amount;
+        itemDiv.appendChild(priceP);
+        const stockP = document.createElement('p');
+        stockP.textContent = '库存: ' + item.itemQuantity;
+        itemDiv.appendChild(stockP);
+        const buyButton = document.createElement('button');
+        buyButton.className = 'buy-button';
+        buyButton.textContent = '购买';
+        buyButton.setAttribute('data-itemId', item.itemId);
+        buyButton.setAttribute('data-itemName', item.itemName);
+        buyButton.setAttribute('data-amount', item.amount);
+        itemDiv.appendChild(buyButton);
+        itemsContainer.appendChild(itemDiv);
+        // 为购买按钮添加事件监听器
+        buyButton.addEventListener('click', handleBuyButtonClick);
+    }
+    function handleBuyButtonClick() {
+        isLogin();
+        const itemId = this.getAttribute('data-itemId');
+        const itemName = this.getAttribute('data-itemName');
+        const totalAmount = this.getAttribute('data-amount');
+        const itemImage = document.querySelector(`.item[data-id="${itemId}"] img`).src;
+        const requestBody = {
+            userId: openid,
+            itemId: itemId,
+            itemName: itemName,
+            totalAmount: totalAmount,
+            itemImage: itemImage
+        };
+        const url1 = "http://localhost:19090/api/pay/order/create";
+        fetch(url1, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': openid
+            },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => response.json())
+            .then(json => {
+                if (json.code === "0000") {
+                    var formHtml = json.data;
+                    document.body.innerHTML += formHtml;
+                    document.forms[0].submit();
+                } else {
+                    console.error('Error:', json.info);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function getCookie(name) {
+        let cookieArr = document.cookie.split(";");
+        for (let i = 0; i < cookieArr.length; i++) {
+            let cookiePair = cookieArr[i].split("=");
+            if (name == cookiePair[0].trim()) {
+                return decodeURIComponent(cookiePair[1]);
+            }
+        }
+        return null;
+    }
+
+    function deleteCookie(name) {
+        // 设置cookie的值为空，并设置expires为过去的日期，这样就可以删除cookie
+        const date = new Date();
+        date.setTime(date.getTime() - 1); // 设置为过去的时间
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=; " + expires + "; path=/";
+    }
+
+    function isLogin() {
+        openid = getCookie("openid")
+        if (!openid) {
+            window.location.href = "login.html"; // 跳转到登录页
+            return;
+        }
+    }
+</script>
+
+</body>
+</html>

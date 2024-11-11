@@ -1,10 +1,6 @@
 package com.rem.weixin.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.rem.weixin.message.TextMessage;
-import com.rem.weixin.properties.AccessToken;
-import com.rem.weixin.properties.WXProperties;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.security.AnyTypePermission;
@@ -13,9 +9,6 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;

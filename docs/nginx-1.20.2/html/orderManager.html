@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .order-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .order-header .back-arrow {
+            display: inline-block;
+            margin-right: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 24px;
+            transition: color 0.3s;
+        }
+
+        .order-header .back-arrow:hover {
+            color: #0056b3;
+        }
+
+        .order {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .order img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .order-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-info p {
+            margin: 6px 0;
+        }
+
+        .order-info .price {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .order-status {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .ship-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .ship-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .again-btn {
+            padding: 10px 20px; /* 按钮内边距 */
+            font-size: 16px; /* 字体大小 */
+            color: #fff; /* 文字颜色 */
+            background-color: #8bc34a; /* 浅绿色背景 */
+            border: none; /* 去掉边框 */
+            border-radius: 5px; /* 圆角边框 */
+            cursor: pointer; /* 鼠标手势 */
+            outline: none; /* 去掉点击时的外轮廓 */
+            transition: background-color 0.3s, box-shadow 0.3s; /* 过渡效果 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+        }
+
+        .again-btn:hover {
+            background-color: #7cb342; /* 鼠标悬停时的浅绿色背景 */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 鼠标悬停时的阴影效果 */
+        }
+
+        .again-btn:active {
+            background-color: #6aa84f; /* 按钮被点击时的浅绿色背景 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 按钮被点击时的阴影效果 */
+        }
+
+        .refund-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .remind-ship-btn {
+            background-color: #f8d7da;
+            color: #333;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        /* 定义订单状态为PAY_SUCCESS时的颜色 */
+        .pay-status {
+            color: #28a745; /* 这是 Bootstrap 中定义的成功颜色，可以根据需要调整 */
+        }
+    </style>
+    <link rel="icon" href="images/icon.jpeg" type="image/jpeg">
+</head>
+<body>
+<div class="container">
+    <div class="order-header">
+        <a href="index.html" class="back-arrow"><</a>
+        <span>订单管理</span>
+    </div>
+    <div id="orders"></div>
+</div>
+<!-- 脚注 -->
+<footer style="position: fixed; bottom: 0; width: 100%; text-align: center; padding: 10px; font-size: 14px;">
+    <p>&copy; Develop By Rem</p>
+</footer>
+<script>
+
+    let openid;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 检查Cookie中的登录状态
+        isLogin();
+        // 如果openid存在，获取订单并渲染
+        getOrders().then(orders => {
+            console.info(orders);
+            renderOrders(orders);
+        }).catch(error => {
+            console.error('Error fetching orders:', error);
+        });
+    });
+
+    async function getOrders() {
+        const url = 'http://localhost:19090/api/pay/order/search';
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': openid
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const json = await response.json();
+        if (json.code === "0000") {
+            return json.data; // 假设订单数据在json.data中
+        } else {
+            throw new Error(json.info);
+        }
+    }
+
+    function renderOrders(orders) {
+        const ordersContainer = document.getElementById('orders');
+        ordersContainer.innerHTML = ''; // Clear the container
+        orders.forEach(order => {
+            // ... 渲染订单的代码
+            const name = order.itemName;
+            const orderElement = document.createElement('div');
+            orderElement.classList.add('order');
+            orderElement.innerHTML = `
+	         <img src="${order.itemImage}" alt="${order.itemName}">
+	         <div class="order-info">
+	             <p><strong>订单ID:</strong> ${order.orderId}</p>
+	             <p><strong>商品名称:</strong> ${order.itemName}</p>
+	             <p class="price"><strong>商品价格:</strong> ¥${order.totalAmount}</p>
+	             <p class="order-status ${order.status === 'DEAL_DONE' ? 'pay-status' : ''}">
+	                   <strong>订单状态:</strong> ${order.status}
+	               </p>
+	             <div class="button-container">
+	                 ${order.status === 'PAY_SUCCESS' ? `
+	                     <button class="refund-btn" onclick="refund(${order.orderId}, ${order.totalAmount}, ${order.itemId}, '${name}')">退款</button>
+	                     <button class="remind-ship-btn" onclick="remind(${order.orderId})" style="margin-left: 10px;">提醒发货</button>
+	                 ` : ''}
+	                 ${['PAY_WAIT'].includes(order.status) ? `
+	                     <button class="ship-btn" onclick="pay(${order.orderId})">支付</button>
+	                 ` : ''}
+	                 ${['CREATE'].includes(order.status) ? `
+	                     <button class="refund-btn" onclick="waitHandle(${order.orderId})">等待系统处理</button>
+	                 ` : ''}
+	                 ${['CLOSE', 'DEAL_DONE', 'REFUND'].includes(order.status) ? `
+	                      <button class="again-btn" onclick="buyAgain(${order.itemId}, '${order.itemName}', ${order.totalAmount}, '${order.itemImage}')">再次购买</button>
+	                   ` : ''}
+	             </div>
+	         </div>
+	     `;
+            ordersContainer.appendChild(orderElement);
+        });
+    }
+
+    function getCookie(name) {
+        let cookieArr = document.cookie.split(";");
+        for (let i = 0; i < cookieArr.length; i++) {
+            let cookiePair = cookieArr[i].split("=");
+            if (name == cookiePair[0].trim()) {
+                return decodeURIComponent(cookiePair[1]);
+            }
+        }
+        return null;
+    }
+
+    // 这里可以添加退款操作的代码，例如发送请求到后端API
+    function refund(id, price, itemId, name) {
+        isLogin();
+        const requestBody = {
+            userId: openid,
+            orderId: id,
+            itemId: itemId,
+            itemName: name,
+            totalAmount: price,
+            reason: "不想要了"
+        };
+        console.info(requestBody);
+        const url = "http://localhost:19090/api/pay/order/refund"
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': openid
+            },
+            body: JSON.stringify(requestBody) // 将请求体转换为JSON字符串
+        })
+            .then(response => response.json()) // 解析JSON格式的响应
+            .then(json => {
+                if (json.code === "0000") { // 假设成功的code是"0000"
+                    alert("退款成功");
+                    window.location.reload(); // 显式刷新页面
+                } else {
+                    console.error('Error:', json.info); // 输出错误信息
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // 付款操作
+    function pay(orderId) {
+        isLogin();
+        const url = `http://localhost:19090/api/pay/order`;
+        const requestBody = {
+            orderId: orderId,
+        };
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': openid
+            },
+            body: JSON.stringify(requestBody) // 将请求体转换为JSON字符串
+        })
+            .then(response => response.json()) // 解析JSON格式的响应
+            .then(json => {
+                if (json.code === "0000") { // 假设成功的code是"0000"
+                    var formHtml = json.data; // 获取data字段中的HTML表单字符串
+                    document.body.innerHTML += formHtml; // 将表单添加到页面上
+                    document.forms[0].submit(); // 自动提交表单
+                } else {
+                    console.error('Error:', json.info); // 输出错误信息
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function remind(orderId) {
+        isLogin();
+        const url = `http://localhost:19090/api/pay/order/remind/${orderId}`
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': openid
+            },
+        })
+            .then(response => response.json()) // 解析JSON格式的响应
+            .then(json => {
+                if (json.code === "0000") { // 假设成功的code是"0000"
+                    alert("提醒发货成功");
+                    window.location.reload();
+                } else {
+                    console.error('Error:', json.info); // 输出错误信息
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        // 这里可以添加提醒发货操作的代码，例如发送请求到后端API
+    }
+
+    function waitHandle(orderId) {
+        alert(`waitHandle for order ID: ${orderId}`);
+        // 这里可以添加支付操作的代码，例如跳转到支付页面或发送请求到后端API
+    }
+
+    function buyAgain(itemId, itemName, totalAmount, itemImage) {
+        isLogin();
+        const url = 'http://localhost:19090/api/pay/order/create';
+        const requestBody = {
+            userId: openid,
+            itemId: itemId,
+            itemName: itemName,
+            totalAmount: totalAmount,
+            itemImage: itemImage
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': openid
+            },
+            body: JSON.stringify(requestBody) // 将请求体转换为JSON字符串
+        })
+            .then(response => response.json()) // 解析JSON格式的响应
+            .then(json => {
+                if (json.code === "0000") { // 假设成功的code是"0000"
+                    var formHtml = json.data; // 获取data字段中的HTML表单字符串
+                    document.body.innerHTML += formHtml; // 将表单添加到页面上
+                    document.forms[0].submit(); // 自动提交表单
+                } else {
+                    console.error('Error:', json.info); // 输出错误信息
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function isLogin() {
+        openid = getCookie("openid")
+        if (!openid) {
+            window.location.href = "login.html"; // 跳转到登录页
+            return;
+        }
+    }
+</script>
+</body>
+</html>

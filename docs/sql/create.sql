@@ -3,17 +3,20 @@ use `pay-mall`;
 drop table if exists pay_order;
 CREATE TABLE `pay_order` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '自增id',
-    user_id VARCHAR(32) COMMENT '用户id',
-    item_id VARCHAR(32) COMMENT '商品id',
+    user_id VARCHAR(32) NOT NULL COMMENT '用户id',
+    item_id VARCHAR(32) NOT NULL COMMENT '商品id',
     item_name VARCHAR(64) NOT NULL COMMENT '商品名称',
+    item_images VARCHAR(64) COMMENT '商品图片url',
     order_id VARCHAR(32) UNIQUE COMMENT '订单id',
     order_time DATETIME COMMENT '下单时间',
     total_amount DECIMAL(8,2) UNSIGNED DEFAULT NULL COMMENT '订单总金额',
-    status VARCHAR(32) NOT NULL COMMENT '订单状态；create-创建完成、pay_wait-等待支付、pay_success-支付成功、deal_done-交易完成、close-订单关单',
+    status VARCHAR(32) NOT NULL COMMENT '订单状态；create-创建完成、pay_wait-等待支付、pay_success-支付成功、deal_done-交易完成、close-订单关单、 refund-退款成功',
     pay_url varchar(2048) DEFAULT NULL COMMENT '支付信息',
     pay_time DATETIME DEFAULT NULL COMMENT '支付时间',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    refund_time DATETIME COMMENT '退款时间',
+    refund_reason VARCHAR(64) COMMENT '退款原因',
     KEY idx_user_item_id (user_id, item_id)
 );
 
