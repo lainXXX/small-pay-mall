@@ -1,11 +1,11 @@
 package com.rem.service.impl;
 
+import com.rem.dto.AccessTokenRes;
 import com.rem.dto.LoginDTO;
 import com.rem.dto.WXQrCodeReq;
-import com.rem.dto.AccessTokenRes;
 import com.rem.dto.WXQrCodeRes;
-import com.rem.service.IWXLoginService;
 import com.rem.service.IWXApiService;
+import com.rem.service.IWXLoginService;
 import com.rem.vo.WeixinTemplateMessageVO;
 import com.rem.weixin.message.TextMessage;
 import com.rem.weixin.properties.WXProperties;
@@ -118,7 +118,7 @@ public class WXLoginServiceImpl implements IWXLoginService {
             log.info("loginKey为空");
             return null;
         }
-//        TODO 因为前端只有loginKey来保证用户登录id的唯一性 所以需要再使用loginKey取出ticket 这个逻辑我目前认为是有问题的 但是后续如果有机会再思考更好的处理
+//        TODO 因为前端只有loginKey来保证用户登录id的唯一性 所以需要再使用loginKey取出ticket 这个逻辑我目前认为是有问题的 但是后续如果有机会再思考更好的处理a
         redisTemplate.opsForValue().set(loginKey, openid, 300, TimeUnit.SECONDS);
         String accessToken = redisTemplate.opsForValue().get(wxProperties.getAppID());
         if (StringUtils.isBlank(accessToken)) {

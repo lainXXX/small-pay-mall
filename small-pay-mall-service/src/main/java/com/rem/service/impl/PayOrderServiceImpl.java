@@ -14,14 +14,12 @@ import com.google.gson.Gson;
 import com.rem.config.AlipayConfig;
 import com.rem.constants.Constants;
 import com.rem.dto.CartDTO;
+import com.rem.dto.PayOrderRes;
 import com.rem.dto.RefundOrderDTO;
 import com.rem.entity.PayOrder;
 import com.rem.mapper.PayOrderMapper;
-import com.rem.dto.PayOrderRes;
 import com.rem.message.SubscriberMessage;
 import com.rem.service.IPayOrderService;
-import com.rem.service.IWXApiService;
-import com.rem.service.ItemService;
 import com.rem.vo.PayOrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -33,7 +31,9 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -62,9 +62,6 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
      */
     @Override
     public PayOrderRes createOrder(CartDTO cartDTO) throws AlipayApiException {
-        if (cartDTO == null) {
-            throw new AlipayApiException("购物车为空");
-        }
         PayOrder unpaidOrder = lambdaQuery().eq(PayOrder::getUserId, cartDTO.getUserId()).eq(PayOrder::getItemId, cartDTO.getItemId()).apply("status = 'CREATE' or 'PAY_WAIT'").one();
         BigDecimal amount = BigDecimal.valueOf(Double.valueOf(cartDTO.getTotalAmount()));
 /*  废案

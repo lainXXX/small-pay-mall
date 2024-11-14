@@ -21,7 +21,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import retrofit2.Call;
-import retrofit2.Response;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

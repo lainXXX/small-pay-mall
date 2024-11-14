@@ -30,6 +30,7 @@ public class PayOrderTask {
         log.info("任务: 订单30分钟未支付自动关闭");
 //        查询需要关闭的订单集合
         List<PayOrder> closeOrderList = payOrderService.lambdaQuery()
+                .select(PayOrder::getOrderId)
                 .eq(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode())
                 .apply("NOW() > create_time + INTERVAL 30 MINUTE")
                 .list();
