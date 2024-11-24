@@ -4,7 +4,6 @@ package com.rem.task;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.rem.constants.Constants;
-import com.rem.controller.XXXController;
 import com.rem.entity.PayOrder;
 import com.rem.service.IPayOrderService;
 import io.jsonwebtoken.lang.Collections;
@@ -21,18 +20,15 @@ public class PayOrderTask {
 
     @Autowired
     private IPayOrderService payOrderService;
-    @Autowired
-    private XXXController xXXController;
 
 
-    @Scheduled(cron = "0 0/15 * * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void orderCloseTask() {
         log.info("任务: 订单30分钟未支付自动关闭");
 //        查询需要关闭的订单集合
         List<PayOrder> closeOrderList = payOrderService.lambdaQuery()
-                .select(PayOrder::getOrderId)
                 .eq(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode())
-                .apply("NOW() > create_time + INTERVAL 30 MINUTE")
+                .apply("NOW() > create_time + INTERVAL 1 MINUTE")
                 .list();
         if (Collections.isEmpty(closeOrderList)) {
             log.info("执行完毕 没有未处理订单");
@@ -46,13 +42,13 @@ public class PayOrderTask {
         });
     }
 
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     public void OrderWaitTask() {
         log.info("任务 处理掉单订单");
 //        查询掉单的订单 也就是创建订单但是却没有进入支付页面的订单
         List<PayOrder> failOrderList = payOrderService.lambdaQuery()
                 .eq(PayOrder::getStatus, Constants.OrderStatusEnum.CREATE.getCode())
-                .apply("NOW() > create_time + INTERVAL 10 MINUTE")
+                .apply("NOW() > create_time + INTERVAL 1 MINUTE")
                 .list();
         if (Collections.isEmpty(failOrderList)) {
             log.info("执行完毕 没有掉单订单");

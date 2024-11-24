@@ -12,7 +12,7 @@ public class WeixinTemplateMessageVO {
 
     private String touser;
     private String template_id;
-    private String url = "http://www.javarem.top";
+    private String url = "https://www.javarem.top";
     private Map<String, Map<String, String>> data = new HashMap<>();
 
     public WeixinTemplateMessageVO(String touser, String template_id) {

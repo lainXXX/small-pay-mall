@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8090
   tomcat:
     max-connections: 20
     threads:
@@ -10,11 +10,11 @@ spring:
   datasource:
     username: root
     password: 123
-    url: jdbc:mysql://mysql:3306/pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
+    url: jdbc:mysql://110.41.180.185:3306/pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     #  database: 1       # 指定所在的库
-    host: redis   # Redis服务器地址 写你的ip
+    host: 110.41.180.185   # Redis服务器地址 写你的ip
     port: 6379        # Redis服务器连接端口
     lettuce:
       pool:
@@ -25,6 +25,8 @@ spring:
     timeout: 6000         # 连接超时时间（毫秒） 去链接redis服务端
 mybatis-plus:
   configuration:
+    #    日志
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     # MyBatis 配置
     map-underscore-to-camel-case: true
   global-config:
@@ -46,8 +48,8 @@ alipay: #支付宝相关的配置
   merchant_private_key: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCrVz4/+F+BqggiAm8C61n39/JZVDME7jjnD94VCHQlNsX100B7EbaB8IdEqPbkS+6L7lyhfvaarbnzB07Qs6H1iyySESNaW7nPlFU3gs9HfLMwfW8HUq6sHXCYQjgxdElyPazj113eMcgkUM793u8drQs/lmMDDXqR/RM0zqWI2vc6gDScXUp+1q1bX2yMF9+Q1a/ITaCz7C2Y9Krmi5nKg8KJ729Hpm/ISX9lHahTDPaGotK/yswndINfndVwsD+i1H7nhc5FS6/9CV9Qo7YoqBb3FeSUpohp8kn35vRetN+xWna6Z4oW4U440UWSRTCNSV5JJ0Crz7FRpzy7lXDDAgMBAAECggEAT5B+zrPmnc64YhqhNEjYCYcxGfw4iOSatemvZjL7xEAwIxxLSBsMlkB8gAy6QX9lMcOpbjEIEQH1ZH6TQeT4o45STy34LcCEg3lNLS7oVDj6+Nx2j378r94n5/xwHb7zUEKFo3PiGgkh+IMx67/3Z99wZsHODp/WuC4+GfqP8gGB2beulANRjX3yzYa9etede51t/XRGErmN1eDPB5LH6qTWVvh/WIb212wxp/nilN+HE8f3nV5Klj8X7+OijaOmyy6dPVII/9e400504c8uGpw7PgKoyg2uc3MfB7ceRyGOjJcT6fyy6oOkg7Nq8pGq5Eua9dHti2M3SI4j6m2aUQKBgQDVsh2hSkyKmMZ88POb47UhsrFZBofDBXdrEW8etUbAle7Qbx70PIeUILOy8UdfeeIlCEiZ+BauCzJXmO4o6282IwCHHoGlLwvKeqZC2xeJN7/Isom7+SD6NSJmfMHj8hzTktqZ3QVgxL99cYNSJMwrjhbkhex8JJPaAI/d11YQiQKBgQDNQp7aUdsiu2B+yRwNnTJyM1jXTOuyxbOM10LiSQaawpgMw4RO2vwjkJylMU+fMLe1w+kE7RqRGMl7zqoRXmXNThW6kFWcRbqUKnJRfn0pN2Ez/svyqg205EEzmPjigoRMgLQQGes8BvM2l/Ipt+EhRy6lZESw0QRIedF42JNr6wKBgHicEAchhTPQaG7KG+SHT4sWbOw/OE7E/hKLA3mEfMtjlCdGIGVe6HKdRm8fqNXlV9Lo6vkjwcE3hpFUOk8UGm+mr7yTZj7R38jHEqG3QIBs26ytv/k88fTmGmVX0qMR2l07jG+9BDUKtr1ZXPH23NlUV+1g/QlQJ7aqDIj76ZJpAoGALYX0A0maR1a1bQkfbqmJkahvsLh/odOVIcxwKg22KEa2QEZwpqiMuTqOc1i/ZvgAFpEPsib/+GQ983Z/Y4DDJUiHKyxtwE36tne/iPF7wtNkfIqrIvOyPIdPKqlnsZzuyKTWyqdk85g7AsWqULRWevH1l3rofSquP4C9A4dNEucCgYEAxNDrpQDxB2kvezCI68Mk7BI7sX6pjofVKgVfuTxb4NvLG1I8LkDxUzq2xTjOJvf/cB81lRDFxxx6HYgnIsOT2NnXw4DCHC1LaYmm9snV8QHDZzPdwuVU+kfFoSKRTaY9sToq+SvUdXaa6y64f7gdzVSVyip5CpQDso4w3ccIs30=
   #你的支付宝公钥
   alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkW6Y7ngxTuPFDxkjA4lhs/Oobwu/26D7cJHgDGxTKdM3yx0lhiczOKx9bkZFLIJrhKkODBWh93q0YqQmSV49htKIMfN0SsXdzuVz86E1SA9+OpI8claT5Tnyzjsw/1zc+Q7mNVhV4VnHyFdc8ZKJsMwwj6sdEJ8GKBGRsxtvi75tl/KQA4IQMBFZYkfXMSBf9naGfIgZ27ov3930ilg+TH35C3uOtYuqX2fOgb3mstER7kAvat2Va2aZlLJGzbytcXFc9RyyyujYrDDbncaCz6uR8AUpeLV+YjICcuhaI4mPm/k21rpqbHmiU1KrN7B+h6Uvi+zXDkBdyIsJWzM/HwIDAQAB
-  notify_url: http://110.41.180.185:8080/pay/notify #这个是下单后的通知
-  return_url: http://www.javarem.top/orderManager.html  #下单成功后的跳转页面
+  notify_url: http://110.41.180.185:8090/pay/notify #这个是下单后的通知
+  return_url: https://www.javarem.top/orderManager.html  #下单成功后的跳转页面
   sign_type: RSA2
   charset: utf-8
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do #「沙箱环境」

@@ -62,8 +62,7 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
      */
     @Override
     public PayOrderRes createOrder(CartDTO cartDTO) throws AlipayApiException {
-        PayOrder unpaidOrder = lambdaQuery().eq(PayOrder::getUserId, cartDTO.getUserId()).eq(PayOrder::getItemId, cartDTO.getItemId()).apply("status = 'CREATE' or 'PAY_WAIT'").one();
-        BigDecimal amount = BigDecimal.valueOf(Double.valueOf(cartDTO.getTotalAmount()));
+//        PayOrder unpaidOrder = lambdaQuery().eq(PayOrder::getUserId, cartDTO.getUserId()).eq(PayOrder::getItemId, cartDTO.getItemId()).apply("status = 'CREATE' or 'PAY_WAIT'").one();
 /*  废案
       if (unpaidOrder != null && Constants.OrderStatusEnum.PAY_WAIT.getCode().equals(unpaidOrder.getStatus())) {
             log.info("存在未支付订单, 订单支付id{}", unpaidOrder.getItemId());
@@ -73,6 +72,7 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
             return buildPayOrderRes(unpaidOrder);
         }*/
 //        利用时间戳和随机数生成一个16位的订单号
+        BigDecimal amount = new BigDecimal(cartDTO.getTotalAmount());
         String orderId = System.currentTimeMillis() + RandomStringUtils.randomNumeric(3);
         PayOrder order = PayOrder.builder().
                 userId(cartDTO.getUserId()).

@@ -105,7 +105,7 @@ public class WXLoginServiceImpl implements IWXLoginService {
         if (StringUtils.isBlank(openid)) {
             return null;
         }
-        redisTemplate.opsForValue().set(openid, openid, 12, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(openid, openid, 1, TimeUnit.DAYS);
         return openid;
     }
 
