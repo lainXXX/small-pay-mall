@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import retrofit2.Call;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -63,17 +63,17 @@ public class WXLoginServiceImpl implements IWXLoginService {
             redisTemplate.opsForValue().set(wxProperties.getAppID(), accessToken, 6900, TimeUnit.SECONDS);
         }
         log.info("accessToken {}", accessToken);
-//        从redis缓存中获取ticket
-        String ticket = redisTemplate.opsForValue().get(accessToken);
-//        判断ticket是否为空 为空则重新生成
-        if (StringUtils.isEmpty(ticket)) {
-            // 2. 生成 ticket
+        log.info("accessToken {}", accessToken);
+        log.info("accessToken {}", accessToken);
+//        利用随机数生成一个scene_id 确保用户登录二维码的唯一性
+        int scene_id = new SecureRandom().nextInt(1000000000);
+        // 2. 生成 ticket
             WXQrCodeReq QrCodeReq = WXQrCodeReq.builder()
                     .expire_seconds(2592000)
                     .action_name(WXQrCodeReq.ActionNameTypeVO.QR_SCENE.getCode())
                     .action_info(WXQrCodeReq.ActionInfo.builder()
                             .scene(WXQrCodeReq.ActionInfo.Scene.builder()
-                                    .scene_id(100601)
+                                    .scene_id(scene_id)
                                     .build())
                             .build())
                     .build();
@@ -82,19 +82,14 @@ public class WXLoginServiceImpl implements IWXLoginService {
             if (qrCodeRes == null) {
                 log.error("qrCodeRes为空");
                 return null;
-            }
-            ticket = qrCodeRes.getTicket();
-            redisTemplate.opsForValue().set(accessToken, ticket, 6900, TimeUnit.SECONDS);
         }
-//        生成一个UUID传给前端 作为登录的验证的唯一参数 保证每个用户的登录的参数独立性
-        String loginKey = UUID.randomUUID().toString();
-        LoginDTO loginDTO = LoginDTO.builder()
-                .ticket(ticket)
+        String loginKey = String.valueOf(scene_id);
+        String eventKey = "scene_id_".concat(loginKey);
+        redisTemplate.opsForValue().set(eventKey, loginKey, 300, TimeUnit.SECONDS);
+        return LoginDTO.builder()
                 .loginKey(loginKey)
+                .ticket(qrCodeRes.getTicket())
                 .build();
-//        把ticket与loginKey绑定 扫描二维码时会获取ticket 到时候再取出loginKey
-        redisTemplate.opsForValue().set(ticket, loginKey, 300, TimeUnit.SECONDS);
-        return loginDTO;
     }
 
     @Override
@@ -110,10 +105,10 @@ public class WXLoginServiceImpl implements IWXLoginService {
     }
 
     @Override
-    public String getLoginStatus(String ticket, String openid) {
+    public String getLoginStatus(String eventKey, String openid) {
 //        扫描二维码后用户会通过post请求推送一个事件 包括ticket和 FromUserName	发送方账号 也就是openid
 //        把这个信息存入缓存 用户登录验证
-        String loginKey = redisTemplate.opsForValue().get(ticket);
+        String loginKey = redisTemplate.opsForValue().get("scene_id_" + eventKey);
         if (StringUtils.isBlank(loginKey)) {
             log.info("loginKey为空");
             return null;
@@ -130,15 +125,17 @@ public class WXLoginServiceImpl implements IWXLoginService {
 
     @Override
     public String post(String xmlString) throws IOException {
+
         TextMessage message = (TextMessage) WXUtils.XMLToBean(xmlString, TextMessage.class);
-        String ticket = message.getTicket();
-        if (StringUtils.isNotBlank(ticket)) {
-            String accessToken = getLoginStatus(ticket, message.getFromUserName());
+        String eventKey = message.getEventKey();
+        if (StringUtils.isNotBlank(eventKey)) {
+            String accessToken = getLoginStatus(eventKey, message.getFromUserName());
             WeixinTemplateMessageVO wxTemplateDTO = WeixinTemplateMessageVO.createLoginTemplate(message.getFromUserName(), template_id);
             Call<Void> call = wxService.sendMessage(accessToken, wxTemplateDTO);
             call.execute();
             return null;
         }
         return WXUtils.buildMessage(message.getToUserName(), message.getFromUserName(), "欢迎来到本公众号");
+
     }
 }
