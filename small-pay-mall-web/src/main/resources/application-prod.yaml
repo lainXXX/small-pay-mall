@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8090
   tomcat:
     max-connections: 20
     threads:
@@ -9,7 +9,7 @@ server:
 spring:
   datasource:
     username: root
-    password: 123
+    password: lain_007
     url: jdbc:mysql://110.41.180.185:3306/pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
@@ -23,6 +23,7 @@ spring:
         max-idle: 10      # 连接池中的最大空闲连接
         min-idle: 0       # 连接池中的最小空闲连接
     timeout: 6000         # 连接超时时间（毫秒） 去链接redis服务端
+    password: _rem000
 mybatis-plus:
   configuration:
     #    日志
@@ -49,7 +50,7 @@ alipay: #支付宝相关的配置
   #你的支付宝公钥
   alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkW6Y7ngxTuPFDxkjA4lhs/Oobwu/26D7cJHgDGxTKdM3yx0lhiczOKx9bkZFLIJrhKkODBWh93q0YqQmSV49htKIMfN0SsXdzuVz86E1SA9+OpI8claT5Tnyzjsw/1zc+Q7mNVhV4VnHyFdc8ZKJsMwwj6sdEJ8GKBGRsxtvi75tl/KQA4IQMBFZYkfXMSBf9naGfIgZ27ov3930ilg+TH35C3uOtYuqX2fOgb3mstER7kAvat2Va2aZlLJGzbytcXFc9RyyyujYrDDbncaCz6uR8AUpeLV+YjICcuhaI4mPm/k21rpqbHmiU1KrN7B+h6Uvi+zXDkBdyIsJWzM/HwIDAQAB
   notify_url: http://110.41.180.185:8090/pay/notify #这个是下单后的通知
-  return_url: https://www.javarem.top/orderManager.html  #下单成功后的跳转页面
+  return_url: http://www.javarem.top/orderManager.html  #下单成功后的跳转页面
   sign_type: RSA2
   charset: utf-8
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do #「沙箱环境」

@@ -1,8 +1,10 @@
 package com.rem.entity;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import lombok.Data;
+import java.util.Date;
 
 
 @Data
@@ -46,6 +48,10 @@ public class Item implements Serializable {
      * 商品价格
      */
     private BigDecimal amount;
+
+    private Date createTime;
+
+    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 

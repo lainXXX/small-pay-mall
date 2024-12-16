@@ -182,7 +182,7 @@
     });
 
     async function getOrders() {
-        const url = 'http://localhost:19090/api/pay/order/search';
+        const url = '/api/pay/order/search';
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -262,7 +262,7 @@
             reason: "不想要了"
         };
         console.info(requestBody);
-        const url = "http://localhost:19090/api/pay/order/refund"
+        const url = "/api/pay/order/refund"
         fetch(url, {
             method: 'POST',
             headers: {
@@ -286,7 +286,7 @@
     // 付款操作
     function pay(orderId) {
         isLogin();
-        const url = `http://localhost:19090/api/pay/order`;
+        const url = `/api/pay/order`;
         const requestBody = {
             orderId: orderId,
         };
@@ -313,7 +313,7 @@
 
     function remind(orderId) {
         isLogin();
-        const url = `http://localhost:19090/api/pay/order/remind/${orderId}`
+        const url = `/api/pay/order/remind/${orderId}`
         fetch(url, {
             method: 'GET',
             headers: {
@@ -341,7 +341,7 @@
 
     function buyAgain(itemId, itemName, totalAmount, itemImage) {
         isLogin();
-        const url = 'http://localhost:19090/api/pay/order/create';
+        const url = '/api/pay/order/create';
         const requestBody = {
             userId: openid,
             itemId: itemId,

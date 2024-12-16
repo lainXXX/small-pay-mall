@@ -74,7 +74,7 @@
 
 
     document.addEventListener('DOMContentLoaded', function () {
-        const url = 'http://localhost:19090/api/item/show';
+        const url = '/api/item/show';
         fetch(url, {
             method: 'GET',
             headers: {
@@ -144,7 +144,7 @@
             totalAmount: totalAmount,
             itemImage: itemImage
         };
-        const url1 = "http://localhost:19090/api/pay/order/create";
+        const url1 = "/api/pay/order/create";
         fetch(url1, {
             method: 'POST',
             headers: {

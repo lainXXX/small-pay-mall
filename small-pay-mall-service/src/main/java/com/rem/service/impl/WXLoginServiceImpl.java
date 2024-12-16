@@ -63,8 +63,6 @@ public class WXLoginServiceImpl implements IWXLoginService {
             redisTemplate.opsForValue().set(wxProperties.getAppID(), accessToken, 6900, TimeUnit.SECONDS);
         }
         log.info("accessToken {}", accessToken);
-        log.info("accessToken {}", accessToken);
-        log.info("accessToken {}", accessToken);
 //        利用随机数生成一个scene_id 确保用户登录二维码的唯一性
         int scene_id = new SecureRandom().nextInt(1000000000);
         // 2. 生成 ticket
@@ -113,7 +111,7 @@ public class WXLoginServiceImpl implements IWXLoginService {
             log.info("loginKey为空");
             return null;
         }
-//        TODO 因为前端只有loginKey来保证用户登录id的唯一性 所以需要再使用loginKey取出ticket 这个逻辑我目前认为是有问题的 但是后续如果有机会再思考更好的处理a
+//       前端只有loginKey来保证用户登录id的唯一性
         redisTemplate.opsForValue().set(loginKey, openid, 300, TimeUnit.SECONDS);
         String accessToken = redisTemplate.opsForValue().get(wxProperties.getAppID());
         if (StringUtils.isBlank(accessToken)) {

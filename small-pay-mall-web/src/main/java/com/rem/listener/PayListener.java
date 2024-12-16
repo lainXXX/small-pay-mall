@@ -112,7 +112,7 @@ public class PayListener implements MessageListener {
             return;
         }
         itemService.lambdaUpdate()
-                .setSql("item_quantity = item_quantity - 1")
+                .setSql("item_quantity = item_quantity - 1 and update_time = now()")
                 .eq(Item::getItemId, order.getItemId())
                 .update();
         WeixinTemplateMessageVO wxTemplateDTO = WeixinTemplateMessageVO.createPayTemplate(

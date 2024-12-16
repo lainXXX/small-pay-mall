@@ -21,7 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         // 替换为你的具体允许的域名
-        config.addAllowedOrigin("https://www.javarem.top"); // 确保使用了正确的协议和格式
+        config.addAllowedOrigin("http://www.javarem.top"); // 确保使用了正确的协议和格式
         config.setAllowCredentials(true); // 当设置为true时，allowedOrigins不能为*
         config.addAllowedMethod("*"); // 允许所有HTTP方法
         config.addAllowedHeader("*"); // 允许所有HTTP头部
