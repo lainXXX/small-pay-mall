@@ -5,194 +5,588 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rem Mall</title>
     <link rel="icon" href="images/icon.jpeg" type="image/jpeg">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #FF90BC;
+            --secondary-color: #FFC0D9;
+            --accent-color: #FF619B;
+            --background-color: #FFF5F7;
+            --text-color: #4A4A4A;
+            --card-background: #ffffff;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 波浪动画背景 */
+        .wave-container {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 144, 188, 0.05);
+            transform-origin: 50% 48%;
+            border-radius: 43%;
+            animation: wave 20s infinite linear;
+        }
+
+        .wave-two {
+            animation: wave 15s infinite linear;
+            opacity: 0.1;
+            background: rgba(255, 192, 217, 0.1);
+        }
+
+        @keyframes wave {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        .user-auth {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .user-auth a, #userDisplay {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.7rem 1.4rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            background: rgba(255, 144, 188, 0.1);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-auth a:hover, #userDisplay:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+
+        .category-filter {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        .item {
+            background: var(--card-background);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .item:hover {
+            transform: translateY(-8px) rotateX(2deg);
+            box-shadow: 0 15px 30px rgba(255, 144, 188, 0.2);
+        }
+
+        .item img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .item:hover img {
+            transform: scale(1.08);
+        }
+
+        .item-content {
+            padding: 1.5rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .item-badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transform: rotate(2deg);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: rotate(2deg) translateY(0px); }
+            50% { transform: rotate(2deg) translateY(-5px); }
+        }
+
+        .item h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .price-tag {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-tag::before {
+            content: '￥';
+            font-size: 1rem;
+        }
+
+        .stock-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: #FFF0F5;
+            color: var(--primary-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .stock-tag i {
+            font-size: 0.8rem;
+        }
+
+        .buy-button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 20px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .buy-button:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .buy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .buy-button:hover::before {
+            left: 100%;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            color: var(--text-color);
+            text-align: center;
+            padding: 3rem 1rem;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* 加载动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .item {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .items {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .item img {
+                height: 280px;
+            }
+
+            header {
+                padding: 1rem;
+            }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        /* 加载动画 */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--background-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
+    <!-- 波浪背景 -->
+    <div class="wave-container">
+        <div class="wave"></div>
+        <div class="wave wave-two"></div>
+    </div>
 
-<header>
-    <h1>Rem Mall</h1>
-    <div class="user-auth">
-        <span id="userDisplay"></span>
-        <div id="userInfo" class="user-info" style="display: none;">
-            <!-- 用户信息内容 -->
+    <header>
+        <h1>Rem Mall</h1>
+        <div class="user-auth">
+            <span id="userDisplay"></span>
+            <div id="userInfo" class="user-info" style="display: none;"></div>
+            <a href="login.html" id="loginBtn">登录</a>
+            <a href="#" id="logoutBtn" style="display:none;">退出登录</a>
         </div>
-        <a href="login.html" id="loginBtn">登录</a>
-        <a href="#" id="logoutBtn" style="display:none;">退出登录</a>
+    </header>
+
+    <div class="container">
+        <!-- 分类筛选 -->
+        <div class="category-filter">
+            <button class="filter-btn active">全部商品</button>
+        </div>
+
+        <div class="items">
+            <!-- 商品将通过JavaScript动态插入到这里 -->
+        </div>
+
+        <!-- 加载动画 -->
+        <div class="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+        </div>
     </div>
-</header>
 
-<div class="container">
-    <div class="items">
-        <!-- 商品将通过JavaScript动态插入到这里 -->
-    </div>
-</div>
+    <footer>
+        <p>测试账号: xqwaiw7622@sandbox.com</p>
+        <p>统一登录和支付密码: 111111</p>
+        <p>&copy; Develop By Rem</p>
+    </footer>
 
-<footer>
-    <p>测试账号: xqwaiw7622@sandbox.com </p>
-    <p>统一登录和支付密码: 111111</p>
-    <p>&copy; Develop By Rem</p>
-</footer>
+    <script>
+        let openid;
 
+        // 页面加载时执行
+        document.addEventListener('DOMContentLoaded', function () {
+            // 检查Cookie中的登录状态
+            openid = getCookie(`openid`);
+            // 当DOM完全加载后执行
+            updateAuthDisplay();
+        });
 
-<script>
+        logoutBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            deleteCookie("openid");
+            window.location.reload(); // 显式刷新页面
+        });
 
-    let openid;
-
-    // 页面加载时执行
-    document.addEventListener('DOMContentLoaded', function () {
-        // 检查Cookie中的登录状态
-        openid = getCookie(`openid`);
-        // 当DOM完全加载后执行
-        updateAuthDisplay();
-    });
-
-
-    logoutBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        deleteCookie("openid");
-        window.location.reload(); // 显式刷新页面
-    });
-
-
-    function updateAuthDisplay() {
-        if (openid != null) {
-            userDisplay.textContent = `订单管理`;
-            userDisplay.style.cursor = 'pointer';
-            loginBtn.style.display = 'none';
-            logoutBtn.style.display = 'inline';
-            // 添加点击事件监听器，实现点击跳转
-            userDisplay.addEventListener('click', function () {
-                // 在这里指定跳转的URL
-                window.location.href = 'orderManager.html'; // 将URL替换为你希望跳转到的页面
-            });
-        } else {
-            userDisplay.textContent = '';
-            loginBtn.style.display = 'inline';
-            logoutBtn.style.display = 'none';
-        }
-    }
-
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const url = '/api/item/show';
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const itemsContainer = document.querySelector('.items');
-                if (Array.isArray(data.data)) {
-                    data.data.forEach(item => {
-                        displayItem(item, itemsContainer);
-                    });
-                } else {
-                    throw new Error('Data format is incorrect, expected an array of items');
-                }
-            })
-            .catch(error => {
-                console.error('无法加载商品数据:', error);
-            });
-    });
-    function displayItem(item, itemsContainer) {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'item';
-        itemDiv.setAttribute('data-price', item.amount);
-        itemDiv.setAttribute('data-name', item.itemName);
-        itemDiv.setAttribute('data-id', item.itemId);
-        const img = document.createElement('img');
-        img.src = item.itemImage;
-        img.alt = item.itemName;
-        itemDiv.appendChild(img);
-        const h2 = document.createElement('h2');
-        h2.textContent = item.itemName;
-        itemDiv.appendChild(h2);
-        const priceP = document.createElement('p');
-        priceP.textContent = '价格: $' + item.amount;
-        itemDiv.appendChild(priceP);
-        const stockP = document.createElement('p');
-        stockP.textContent = '库存: ' + item.itemQuantity;
-        itemDiv.appendChild(stockP);
-        const buyButton = document.createElement('button');
-        buyButton.className = 'buy-button';
-        buyButton.textContent = '购买';
-        buyButton.setAttribute('data-itemId', item.itemId);
-        buyButton.setAttribute('data-itemName', item.itemName);
-        buyButton.setAttribute('data-amount', item.amount);
-        itemDiv.appendChild(buyButton);
-        itemsContainer.appendChild(itemDiv);
-        // 为购买按钮添加事件监听器
-        buyButton.addEventListener('click', handleBuyButtonClick);
-    }
-    function handleBuyButtonClick() {
-        isLogin();
-        const itemId = this.getAttribute('data-itemId');
-        const itemName = this.getAttribute('data-itemName');
-        const totalAmount = this.getAttribute('data-amount');
-        const itemImage = document.querySelector(`.item[data-id="${itemId}"] img`).src;
-        const requestBody = {
-            userId: openid,
-            itemId: itemId,
-            itemName: itemName,
-            totalAmount: totalAmount,
-            itemImage: itemImage
-        };
-        const url1 = "/api/pay/order/create";
-        fetch(url1, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'token': openid
-            },
-            body: JSON.stringify(requestBody)
-        })
-            .then(response => response.json())
-            .then(json => {
-                if (json.code === "0000") {
-                    var formHtml = json.data;
-                    document.body.innerHTML += formHtml;
-                    document.forms[0].submit();
-                } else {
-                    console.error('Error:', json.info);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function getCookie(name) {
-        let cookieArr = document.cookie.split(";");
-        for (let i = 0; i < cookieArr.length; i++) {
-            let cookiePair = cookieArr[i].split("=");
-            if (name == cookiePair[0].trim()) {
-                return decodeURIComponent(cookiePair[1]);
+        function updateAuthDisplay() {
+            if (openid != null) {
+                userDisplay.textContent = `订单管理`;
+                userDisplay.style.cursor = 'pointer';
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline';
+                // 添加点击事件监听器，实现点击跳转
+                userDisplay.addEventListener('click', function () {
+                    // 在这里指定跳转的URL
+                    window.location.href = 'orderManager.html'; // 将URL替换为你希望跳转到的页面
+                });
+            } else {
+                userDisplay.textContent = '';
+                loginBtn.style.display = 'inline';
+                logoutBtn.style.display = 'none';
             }
         }
-        return null;
-    }
 
-    function deleteCookie(name) {
-        // 设置cookie的值为空，并设置expires为过去的日期，这样就可以删除cookie
-        const date = new Date();
-        date.setTime(date.getTime() - 1); // 设置为过去的时间
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = name + "=; " + expires + "; path=/";
-    }
+        document.addEventListener('DOMContentLoaded', function () {
+            const url = '/api/item/show';
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const itemsContainer = document.querySelector('.items');
+                    if (Array.isArray(data.data)) {
+                        data.data.forEach(item => {
+                            displayItem(item, itemsContainer);
+                        });
+                    } else {
+                        throw new Error('Data format is incorrect, expected an array of items');
+                    }
+                })
+                .catch(error => {
+                    console.error('无法加载商品数据:', error);
+                });
+        });
 
-    function isLogin() {
-        openid = getCookie("openid")
-        if (!openid) {
-            window.location.href = "login.html"; // 跳转到登录页
-            return;
+        function displayItem(item, itemsContainer) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.setAttribute('data-price', item.amount);
+            itemDiv.setAttribute('data-name', item.itemName);
+            itemDiv.setAttribute('data-id', item.itemId);
+
+            const img = document.createElement('img');
+            img.src = item.itemImage;
+            img.alt = item.itemName;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'item-content';
+            
+            const badge = document.createElement('div');
+            badge.className = 'item-badge';
+            badge.innerHTML = '<i class="fas fa-fire"></i> 热销';
+            
+            const h2 = document.createElement('h2');
+            h2.textContent = item.itemName;
+            
+            const priceP = document.createElement('p');
+            priceP.className = 'price-tag';
+            priceP.textContent = item.amount;
+            
+            const stockP = document.createElement('p');
+            stockP.className = 'stock-tag';
+            stockP.innerHTML = `<i class="fas fa-box"></i> 库存: ${item.itemQuantity}`;
+            
+            const buyButton = document.createElement('button');
+            buyButton.className = 'buy-button';
+            buyButton.innerHTML = '<i class="fas fa-shopping-cart"></i> 立即购买';
+            buyButton.setAttribute('data-itemId', item.itemId);
+            buyButton.setAttribute('data-itemName', item.itemName);
+            buyButton.setAttribute('data-amount', item.amount);
+
+            itemDiv.appendChild(img);
+            contentDiv.appendChild(badge);
+            contentDiv.appendChild(h2);
+            contentDiv.appendChild(priceP);
+            contentDiv.appendChild(stockP);
+            contentDiv.appendChild(buyButton);
+            itemDiv.appendChild(contentDiv);
+            
+            itemsContainer.appendChild(itemDiv);
+            buyButton.addEventListener('click', handleBuyButtonClick);
         }
-    }
-</script>
 
+        function handleBuyButtonClick() {
+            isLogin();
+            const itemId = this.getAttribute('data-itemId');
+            const itemName = this.getAttribute('data-itemName');
+            const totalAmount = this.getAttribute('data-amount');
+            const itemImage = document.querySelector(`.item[data-id="${itemId}"] img`).src;
+            const requestBody = {
+                userId: openid,
+                itemId: itemId,
+                itemName: itemName,
+                totalAmount: totalAmount,
+                itemImage: itemImage
+            };
+            const url1 = "/api/pay/order/create";
+            fetch(url1, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': openid
+                },
+                body: JSON.stringify(requestBody)
+            })
+                .then(response => response.json())
+                .then(json => {
+                    if (json.code === "0000") {
+                        var formHtml = json.data;
+                        document.body.innerHTML += formHtml;
+                        document.forms[0].submit();
+                    } else {
+                        console.error('Error:', json.info);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if (name == cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            // 设置cookie的值为空，并设置expires为过去的日期，这样就可以删除cookie
+            const date = new Date();
+            date.setTime(date.getTime() - 1); // 设置为过去的时间
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=; " + expires + "; path=/";
+        }
+
+        function isLogin() {
+            openid = getCookie("openid")
+            if (!openid) {
+                window.location.href = "login.html"; // 跳转到登录页
+                return;
+            }
+        }
+
+        // 简化分类筛选功能
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 添加页面加载动画
+        function showLoading() {
+            document.querySelector('.loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.querySelector('.loading').style.display = 'none';
+        }
+    </script>
 </body>
 </html>

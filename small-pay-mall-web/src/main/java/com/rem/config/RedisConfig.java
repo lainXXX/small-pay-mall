@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -20,9 +21,16 @@ public class RedisConfig {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         //设置连接工厂
         template.setConnectionFactory(connectionFactory);
-        // 使用 String 序列化
+        // 使用 Jackson2JsonRedisSerializer 序列化值
+        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
+
+        // 使用 StringRedisSerializer 序列化键
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+
+        template.afterPropertiesSet();
         return template;
     }
 

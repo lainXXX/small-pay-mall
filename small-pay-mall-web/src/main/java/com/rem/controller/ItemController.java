@@ -1,6 +1,5 @@
 package com.rem.controller;
 
-import com.rem.entity.Item;
 import com.rem.response.Response;
 import com.rem.service.ItemService;
 import com.rem.vo.ItemVO;
@@ -25,6 +24,12 @@ public class ItemController {
     @GetMapping("/show")
     public Response<List<ItemVO>> showItem() {
         List<ItemVO> itemVOList = itemService.showItem();
+        return Response.success(itemVOList);
+    }
+
+    @GetMapping("/show/special")
+    public Response<List<ItemVO>> showSpecialItem() {
+        List<ItemVO> itemVOList = itemService.showSpecialItem();
         return Response.success(itemVOList);
     }
 

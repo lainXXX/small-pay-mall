@@ -87,7 +87,7 @@ public class PayListener implements MessageListener {
 
 //                 TODO 退货操作
         itemService.lambdaUpdate()
-                .setSql("item_quantity = item_quantity - 1")
+                .setSql("item_quantity = item_quantity + 1, update_time = now()")
                 .eq(Item::getItemId, message.getOrderId())
                 .update();
         WeixinTemplateMessageVO refundTemplate = WeixinTemplateMessageVO.createRefundTemplate(
@@ -112,7 +112,7 @@ public class PayListener implements MessageListener {
             return;
         }
         itemService.lambdaUpdate()
-                .setSql("item_quantity = item_quantity - 1 and update_time = now()")
+                .setSql("item_quantity = item_quantity - 1, update_time = now()")
                 .eq(Item::getItemId, order.getItemId())
                 .update();
         WeixinTemplateMessageVO wxTemplateDTO = WeixinTemplateMessageVO.createPayTemplate(

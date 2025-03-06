@@ -15,4 +15,6 @@ public interface ItemService extends IService<Item> {
 
     List<ItemVO> showItem();
 
+    List<ItemVO> showSpecialItem();
+
 }

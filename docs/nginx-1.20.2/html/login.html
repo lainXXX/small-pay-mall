@@ -6,140 +6,310 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rem Mall Login</title>
     <link rel="icon" href="images/icon.jpeg" type="image/jpeg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #FF90BC;
+            --secondary-color: #FFC0D9;
+            --accent-color: #FF619B;
+            --background-color: #FFF5F7;
+            --text-color: #4A4A4A;
+            --card-background: #ffffff;
+        }
+
         body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--background-color);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 波浪背景 */
+        .wave-container {
+            position: fixed;
+            width: 100%;
             height: 100vh;
-            margin: 0;
-            background-color: #f7f7f7;
-            font-family: Arial, sans-serif;
+            overflow: hidden;
+            z-index: -1;
         }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 144, 188, 0.05);
+            transform-origin: 50% 48%;
+            border-radius: 43%;
+            animation: wave 20s infinite linear;
+        }
+
+        .wave-two {
+            animation: wave 15s infinite linear;
+            opacity: 0.1;
+            background: rgba(255, 192, 217, 0.1);
+        }
+
+        @keyframes wave {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .login-container {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 360px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: fadeIn 0.6s ease-out;
         }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--primary-color), 
+                var(--secondary-color), 
+                var(--accent-color));
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(10px);
+        }
+
         .login-container h2 {
-            margin-bottom: 20px;
-            color: #333;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            font-size: 1.8rem;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
         }
+
+        .login-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
         .qr-code {
-            margin-bottom: 20px;
+            margin: 2rem 0;
+            position: relative;
+            padding: 1rem;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
+
         .qr-code img {
             max-width: 100%;
             height: auto;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
         }
+
+        .qr-code:hover img {
+            transform: scale(1.02);
+        }
+
         .login-container p {
-            color: #666;
-            margin-bottom: 10px;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            font-size: 1rem;
+            opacity: 0.8;
         }
+
         .login-container button {
-            background-color: #5cb85c;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
             color: white;
-            padding: 10px 20px;
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
         .login-container button:hover {
-            background-color: #4cae4c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 144, 188, 0.3);
+        }
+
+        .login-container button::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,255,255,0.2), 
+                transparent);
+            transition: 0.5s;
+        }
+
+        .login-container button:hover::after {
+            left: 100%;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(76, 175, 80, 0.1);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem;
+                width: 95%;
+            }
         }
     </style>
 </head>
 
 <body>
-<div class="login-container">
-    <h2>二维码登录</h2>
-    <div class="qr-code">
-        <!-- 这里将显示二维码 -->
-        <img id="qrCodeImage" src="images/placeholder.jpeg" alt="登录二维码">
+    <!-- 波浪背景 -->
+    <div class="wave-container">
+        <div class="wave"></div>
+        <div class="wave wave-two"></div>
     </div>
-    <p>请使用微信扫描二维码以登录</p>
-    <button onclick="handleLogin()">登录</button>
-    <div id="success-message" class="success-message" style="display: none; color: green; margin-top: 20px;">
-        登录成功！
+
+    <div class="login-container">
+        <h2><i class="fas fa-qrcode"></i> 二维码登录</h2>
+        <div class="qr-code">
+            <img id="qrCodeImage" src="images/placeholder.jpeg" alt="登录二维码">
+        </div>
+        <p><i class="fab fa-weixin"></i> 请使用微信扫描二维码以登录</p>
+        <button onclick="handleLogin()">
+            <i class="fas fa-sign-in-alt"></i> 获取二维码
+        </button>
+        <div id="success-message" class="success-message" style="display: none;">
+            <i class="fas fa-check-circle"></i> 登录成功！
+        </div>
     </div>
-</div>
 
-<!-- 脚注 -->
-<footer style="position: fixed; bottom: 0; width: 100%; text-align: center; padding: 10px; font-size: 14px;">
-    <p>&copy; Develop By Rem</p>
-</footer>
-<script>
-    function handleLogin() {
-        // 获取二维码 ticket
-        fetch('/api/wx/login/qrcode/create')
-            .then(response => response.json())
-            .then(data => {
-                if (data.code === "0000") {
-                    const {ticket, loginKey} = data.data;
-                    // 获取二维码图片元素
-                    const qrCodeImage = document.getElementById('qrCodeImage');
-                    // 更新二维码图片的src属性为登录二维码图片的路径
-                    qrCodeImage.src = `https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${encodeURIComponent(ticket)}`; // 替换为实际的登录二维码图片路径
+    <footer>
+        <p>&copy; Develop By Rem</p>
+    </footer>
 
-                    // 隐藏登录按钮
-                    const loginButton = document.querySelector('.login-container button');
-                    loginButton.style.display = 'none';
-
-                    // 开始轮询检查登录状态
-                    const intervalId = setInterval(() => {
-                        checkLoginStatus(loginKey, intervalId);
-                    }, 3000); // 每3秒检查一次
-                } else {
-                    console.error('获取二维码 ticket 失败:', data.info);
-                }
-            })
-            .catch(error => {
-                console.error('请求失败:', error);
-            });
-
-        function checkLoginStatus(loginKey, intervalId) {
-            fetch(`/api/wx/login/check?loginKey=${loginKey}`)
+    <script>
+        function handleLogin() {
+            // 获取二维码 ticket
+            fetch('/api/wx/login/qrcode/create')
                 .then(response => response.json())
                 .then(data => {
                     if (data.code === "0000") {
-                        console.info("login success");
-                        // 停止轮询
-                        clearInterval(intervalId);
-                        // 保存登录 token 到 cookie，设置有效期为30天
-                        setCookie('openid', data.data, 1);
-                        // 在这里可以重定向到登录后的页面
-                        document.getElementById('success-message').style.display = 'block';
-                        // 在这里可以重定向到登录后的页面
-                        setTimeout(() => {
-                            window.location.href = 'index.html'; // 假设登录成功后跳转到首页
-                            // 等待页面加载完成后，刷新页面
-                            window.addEventListener('load', function() {
-                                location.reload();
-                            });
-                        }, 2000); // 延迟2秒再跳转
+                        const {ticket, loginKey} = data.data;
+                        // 获取二维码图片元素
+                        const qrCodeImage = document.getElementById('qrCodeImage');
+                        // 更新二维码图片的src属性为登录二维码图片的路径
+                        qrCodeImage.src = `https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${encodeURIComponent(ticket)}`; // 替换为实际的登录二维码图片路径
 
+                        // 隐藏登录按钮
+                        const loginButton = document.querySelector('.login-container button');
+                        loginButton.style.display = 'none';
+
+                        // 开始轮询检查登录状态
+                        const intervalId = setInterval(() => {
+                            checkLoginStatus(loginKey, intervalId);
+                        }, 3000); // 每3秒检查一次
                     } else {
-                        console.info("login wait");
+                        console.error('获取二维码 ticket 失败:', data.info);
                     }
                 })
                 .catch(error => {
                     console.error('请求失败:', error);
                 });
+
+            function checkLoginStatus(loginKey, intervalId) {
+                fetch(`/api/wx/login/check?loginKey=${loginKey}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.code === "0000") {
+                            console.info("login success");
+                            // 停止轮询
+                            clearInterval(intervalId);
+                            // 保存登录 token 到 cookie，设置有效期为30天
+                            setCookie('openid', data.data, 1);
+                            // 在这里可以重定向到登录后的页面
+                            document.getElementById('success-message').style.display = 'block';
+                            // 在这里可以重定向到登录后的页面
+                            setTimeout(() => {
+                                window.location.href = 'index.html'; // 假设登录成功后跳转到首页
+                                // 等待页面加载完成后，刷新页面
+                                window.addEventListener('load', function() {
+                                    location.reload();
+                                });
+                            }, 2000); // 延迟2秒再跳转
+
+                        } else {
+                            console.info("login wait");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('请求失败:', error);
+                    });
+            }
+
+            function setCookie(name, value, days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                const expires = "expires=" + date.toUTCString();
+                document.cookie = name + "=" + value + ";" + expires + ";path=/";
+            }
         }
-
-        function setCookie(name, value, days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            const expires = "expires=" + date.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
-        }
-    }
-
-
-</script>
+    </script>
 </body>
 </html>
