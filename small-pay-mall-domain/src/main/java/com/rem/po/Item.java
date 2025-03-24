@@ -1,4 +1,4 @@
-package com.rem.entity;
+package com.rem.po;
 
 import lombok.Data;
 
@@ -48,6 +48,10 @@ public class Item implements Serializable {
      * 商品价格
      */
     private BigDecimal amount;
+
+    private String source;
+
+    private String channel;
 
     private Date createTime;
 

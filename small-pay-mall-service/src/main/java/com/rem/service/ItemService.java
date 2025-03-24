@@ -1,7 +1,7 @@
 package com.rem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.rem.entity.Item;
+import com.rem.po.Item;
 import com.rem.vo.ItemVO;
 
 import java.util.List;

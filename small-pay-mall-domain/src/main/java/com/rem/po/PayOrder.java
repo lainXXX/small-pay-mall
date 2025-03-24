@@ -1,13 +1,12 @@
-package com.rem.entity;
+package com.rem.po;
+
+import lombok.Builder;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
-
-import lombok.Builder;
-import lombok.Data;
 
 /**
  * 
@@ -55,6 +54,12 @@ public class PayOrder implements Serializable {
      * 订单总金额
      */
     private BigDecimal totalAmount;
+
+    private BigDecimal discountAmount;
+
+    private BigDecimal payAmount;
+
+    private Integer marketType;
 
     /**
      * 订单状态；create-创建完成、pay_wait-等待支付、pay_success-支付成功、deal_done-交易完成、close-订单关单

@@ -3,7 +3,7 @@ package com.rem;
 import com.alipay.api.AlipayApiException;
 import com.rem.constants.Constants;
 import com.rem.dto.LoginDTO;
-import com.rem.entity.PayOrder;
+import com.rem.po.PayOrder;
 import com.rem.service.IPayOrderService;
 import com.rem.service.IWXLoginService;
 import com.rem.service.impl.PayOrderServiceImpl;

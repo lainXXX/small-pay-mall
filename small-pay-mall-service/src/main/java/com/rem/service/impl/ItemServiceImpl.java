@@ -2,8 +2,8 @@ package com.rem.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.rem.entity.Item;
 import com.rem.mapper.ItemMapper;
+import com.rem.po.Item;
 import com.rem.service.ItemService;
 import com.rem.vo.ItemVO;
 import org.springframework.beans.BeanUtils;

@@ -12,6 +12,27 @@ spring:
     password: lain_007
     url: jdbc:mysql://110.41.180.185:3306/pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
+  rabbitmq:
+    addresses: 47.108.69.78
+    port: 5672
+    username: lain
+    password: lain_007
+    listener:
+      simple:
+        prefetch: 1
+    template:
+      delivery-mode: persistent
+    # 消息配置
+    config:
+      consumer:
+        # 消费 topic 主题，team_success
+        topic_team_success:
+          # 绑定交换机 - 消息提供者的交换机
+          exchange: group_buy_market_exchange
+          # 消息主题
+          routing_key: topic.team_success
+          # 消费队列 - 每个系统有自己的消费队列
+          queue: s_pay_mall_queue_2_topic_team_success
   redis:
     #  database: 1       # 指定所在的库
     host: localhost   # Redis服务器地址 写你的ip
@@ -33,6 +54,16 @@ mybatis-plus:
     db-config:
       # 数据库配置
       id-type: auto
+dubbo:
+  application:
+    name: group-buying-platform  # 应用名称
+    version: 1.0  # 应用版本
+  registry:
+    id: nacos-registry  # 注册中心ID 单注册中心不需要配置 多个注册中心需要id作为唯一标识
+    address: nacos://110.41.180.185:8848   #Nacos注册中心地址
+  protocol:
+    name: dubbo  # 使用Dubbo协议
+    port: -1  # 自动选择端口
 wx:
   appID: wxd2ad4769817d3daf #微信公众测试号appID
   appSecret: ccdbcb6a93b444f1ebc3bdc6625dc18a #app密钥

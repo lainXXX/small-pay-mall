@@ -2,9 +2,9 @@ package com.rem.listener;
 
 import com.google.gson.Gson;
 import com.rem.constants.Constants;
-import com.rem.entity.Item;
-import com.rem.entity.PayOrder;
 import com.rem.message.SubscriberMessage;
+import com.rem.po.Item;
+import com.rem.po.PayOrder;
 import com.rem.service.IPayOrderService;
 import com.rem.service.IWXApiService;
 import com.rem.service.ItemService;

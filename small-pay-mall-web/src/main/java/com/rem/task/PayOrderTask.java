@@ -4,13 +4,14 @@ package com.rem.task;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.rem.constants.Constants;
-import com.rem.entity.PayOrder;
+import com.rem.po.PayOrder;
 import com.rem.service.IPayOrderService;
 import io.jsonwebtoken.lang.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import top.javarem.api.dto.LockMarketPayOrderResponseDTO;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class PayOrderTask {
         });
     }
 
-    @Scheduled(cron = "0 0/15 * * * ?")
+//    @Scheduled(cron = "0 0/15 * * * ?")
     public void OrderWaitTask() {
         log.info("任务 处理掉单订单");
 //        查询掉单的订单 也就是创建订单但是却没有进入支付页面的订单
@@ -57,7 +58,7 @@ public class PayOrderTask {
         failOrderList.stream().forEach(order -> {
             AlipayTradePagePayResponse response = null;
             try {
-                response = payOrderService.doPay(order.getOrderId(), order.getTotalAmount(), order.getItemName());
+                response = payOrderService.doPay(order.getOrderId(), order.getTotalAmount(), new LockMarketPayOrderResponseDTO(), order.getItemName());
             } catch (AlipayApiException e) {
                 log.info("获取支付单失败 {}", e.getMessage());
             }

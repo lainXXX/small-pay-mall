@@ -1,7 +1,7 @@
 package com.rem;
 
 import com.rem.constants.Constants;
-import com.rem.entity.PayOrder;
+import com.rem.po.PayOrder;
 import com.rem.service.IPayOrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
