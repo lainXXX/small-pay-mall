@@ -2,7 +2,6 @@ package com.rem.config;
 
 import com.rem.interceptor.LoginInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private LoginInterceptor loginInterceptor;
 
-    @Bean
+//    @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         // 替换为你的具体允许的域名

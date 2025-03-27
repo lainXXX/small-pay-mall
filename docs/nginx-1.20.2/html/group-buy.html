@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼团购买 - Rem Mall</title>
+    <link rel="icon" href="images/icon.jpeg" type="image/jpeg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #FF90BC;
+            --secondary-color: #FFC0D9;
+            --accent-color: #FF619B;
+            --background-color: #FFF5F7;
+            --text-color: #4A4A4A;
+            --card-background: #ffffff;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 波浪动画背景 */
+        .wave-container {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 144, 188, 0.05);
+            transform-origin: 50% 48%;
+            border-radius: 43%;
+            animation: wave 20s infinite linear;
+        }
+
+        .wave-two {
+            animation: wave 15s infinite linear;
+            opacity: 0.1;
+            background: rgba(255, 192, 217, 0.1);
+        }
+
+        @keyframes wave {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-button {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.7rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            background: rgba(255, 144, 188, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 144, 188, 0.2);
+            transform: translateX(-3px);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .group-buy-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin: 10px 0;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .group-buy-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 144, 188, 0.15);
+        }
+
+        .slider-container {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 20px;
+            margin: 15px;
+            width: calc(100% - 30px);  /* 考虑margin */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+        .slider img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: white;
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        .product-info {
+            padding: 12px 15px;
+        }
+
+        .product-info h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .price-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .discount-tag {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .buyers-count {
+            font-size: 0.85rem;
+            color: #ff6b6b;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .buyers-count i {
+            color: #ff6b6b;
+            animation: flame 1s infinite;
+        }
+
+        @keyframes flame {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .price-section {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .price-item {
+            flex: 1;
+        }
+
+        .price-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .original-price {
+            font-size: 16px;
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .group-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .group-options {
+            padding: 12px 15px;
+            border-top: 1px solid #f5f5f5;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .group-option {
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .group-option:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(255, 144, 188, 0.1);
+        }
+
+        .avatar-group {
+            position: relative;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #fff;
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff90bc;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        .group-info {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .nickname {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .timer {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .join-btn, .buy-alone, .buy-group {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .join-btn:hover, .buy-alone:hover, .buy-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 144, 188, 0.2);
+        }
+
+        .join-btn:active, .buy-alone:active, .buy-group:active {
+            transform: translateY(1px);
+        }
+
+        .join-btn::after, .buy-alone::after, .buy-group::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+        }
+
+        .join-btn:active::after, .buy-alone:active::after, .buy-group:active::after {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+        }
+
+        .buy-options {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .buy-alone, .buy-group {
+            flex: 1;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .buy-alone {
+            background: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .buy-group {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 144, 188, 0.2);
+        }
+
+        .buy-alone:hover, .buy-group:hover {
+            transform: translateY(-2px);
+        }
+
+        .buy-alone:hover {
+            background: rgba(255, 144, 188, 0.05);
+            box-shadow: 0 4px 15px rgba(255, 144, 188, 0.1);
+        }
+
+        .buy-group:hover {
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            box-shadow: 0 6px 20px rgba(255, 144, 188, 0.3);
+        }
+
+        .buy-alone:active, .buy-group:active {
+            transform: translateY(1px);
+        }
+
+        .buy-alone .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .buy-group .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: white;
+            -webkit-text-fill-color: white;
+        }
+
+        .buy-alone .label, .buy-group .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .empty-notice {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 16px;
+            color: #888;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+                margin: 1rem auto;
+            }
+            
+            .group-buy-card {
+                border-radius: 0;
+            }
+            
+            .slider-container {
+                height: 250px;
+            }
+        }
+
+        .view-all {
+            float: right;
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .view-all:hover {
+            text-decoration: underline;
+        }
+        
+        /* 全部拼团模态框 */
+        .teams-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .teams-modal {
+            width: 90%;
+            max-width: 450px;
+            max-height: 75vh;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .teams-modal-header {
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f2f2f2;
+        }
+        
+        .teams-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .teams-modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .teams-modal-body {
+            padding: 12px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .teams-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .no-teams {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        
+        .loading-teams {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 去拼团按钮样式优化 */
+        .join-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 144, 188, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .join-btn .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .join-btn .btn-hover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .join-btn:hover .btn-hover {
+            opacity: 1;
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 144, 188, 0.3);
+        }
+
+        .join-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(255, 144, 188, 0.2);
+        }
+
+        /* 轮播图优化 */
+        .slider-container {
+            margin: 15px;
+            width: calc(100% - 30px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slider img {
+            width: 100%;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        .own-team-tag {
+            padding: 6px 12px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.9;
+            box-shadow: 0 2px 8px rgba(255, 144, 188, 0.2);
+        }
+
+        /* 自己的拼团样式特殊处理 */
+        .group-option:first-child {
+            background: linear-gradient(to right, rgba(255, 144, 188, 0.1), rgba(255, 97, 155, 0.1));
+            border: 1px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 波浪背景 -->
+    <div class="wave-container">
+        <div class="wave"></div>
+        <div class="wave wave-two"></div>
+    </div>
+
+    <header>
+        <a href="javascript:history.back()" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1>拼团购买</h1>
+        <div style="width: 44px;"></div> <!-- 占位元素 -->
+    </header>
+
+    <div class="container">
+        <div class="group-buy-card">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+            </div>
+            <!-- 内容将通过JavaScript动态添加 -->
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数
+        function getUrlParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const pairs = queryString.split('&');
+            
+            for (const pair of pairs) {
+                const [key, value] = pair.split('=');
+                if (key) params[key] = decodeURIComponent(value || '');
+            }
+            
+            return params;
+        }
+
+        // 检查Cookie
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if (name == cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        // 检查是否登录
+        function isLogin() {
+            const openid = getCookie("openid");
+            if (!openid) {
+                window.location.href = "login.html"; // 跳转到登录页
+                return false;
+            }
+            return openid;
+        }
+
+        // 匿名化用户ID
+        function anonymizeUserId(userId) {
+            if (!userId) return '匿名用户';
+            if (userId.length <= 4) return userId;
+            
+            return userId.substring(0, 2) + '***' + userId.substring(userId.length - 2);
+        }
+
+        // 格式化倒计时
+        function formatCountdown(seconds) {
+            if (!seconds || seconds <= 0) return '即将结束';
+            
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}后结束`;
+        }
+
+        // 渲染团队列表
+        function renderTeams(teams, container, joinCallback) {
+            if (!container) {
+                console.error('容器元素不存在');
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            if (!teams || teams.length === 0) {
+                container.innerHTML = '<div class="no-teams">暂无可参与的拼团</div>';
+                return;
+            }
+
+            const openid = getCookie("openid");
+            
+            teams.forEach((team, index) => {
+                const teamOption = document.createElement('div');
+                teamOption.className = 'group-option';
+                
+                // 解析倒计时字符串为秒数
+                const timeParts = team.validTimeCountdown.split(':');
+                let totalSeconds = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
+                
+                // 判断是否是自己的拼团（第一个且userId匹配）
+                const isOwnTeam = index === 0 && team.userId === openid;
+                
+                teamOption.innerHTML = `
+                    <div class="group-info">
+                        <div class="nickname">${anonymizeUserId(team.userId)}</div>
+                        <div class="timer" data-seconds="${totalSeconds}">
+                            还差${team.differenceCount}人 · ${formatCountdown(totalSeconds)}
+                        </div>
+                    </div>
+                    ${isOwnTeam ? 
+                        '<div class="own-team-tag">我的拼团</div>' : 
+                        `<button class="join-btn" data-team-id="${team.teamId}">
+                            <span class="btn-text">去拼团</span>
+                            <span class="btn-hover"></span>
+                        </button>`
+                    }
+                `;
+                
+                container.appendChild(teamOption);
+                
+                // 只为其他人的拼团添加点击事件
+                if (!isOwnTeam) {
+                    const joinBtn = teamOption.querySelector('.join-btn');
+                    joinBtn.addEventListener('click', () => {
+                        if (joinCallback) joinCallback(team);
+                    });
+                }
+            });
+
+            // 启动倒计时更新
+            startCountdown();
+        }
+
+        // 更新所有倒计时
+        function startCountdown() {
+            const timers = document.querySelectorAll('.timer');
+            
+            // 清除可能存在的旧定时器
+            if (window.countdownInterval) {
+                clearInterval(window.countdownInterval);
+            }
+            
+            window.countdownInterval = setInterval(() => {
+                timers.forEach(timer => {
+                    let seconds = parseInt(timer.getAttribute('data-seconds'));
+                    if (seconds > 0) {
+                        seconds--;
+                        timer.setAttribute('data-seconds', seconds);
+                        const differenceCount = timer.textContent.split('·')[0].trim();
+                        timer.textContent = `${differenceCount} · ${formatCountdown(seconds)}`;
+                    }
+                });
+            }, 1000);
+        }
+
+        // 轮播图逻辑优化
+        function initializeSlider() {
+            let currentSlide = 0;
+            const slider = document.querySelector('.slider');
+            const dots = document.querySelectorAll('.dot');
+            const totalSlides = dots.length;
+            
+            function showSlide(index) {
+                if (!slider || !dots.length) return;
+                
+                currentSlide = (index + totalSlides) % totalSlides;
+                slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentSlide);
+                });
+            }
+            
+            // 添加点击事件
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => showSlide(index));
+            });
+            
+            // 自动轮播
+            function startAutoSlide() {
+                return setInterval(() => {
+                    showSlide(currentSlide + 1);
+                }, 3000);
+            }
+            
+            let slideInterval = startAutoSlide();
+            
+            // 鼠标悬停时暂停轮播
+            slider.parentElement.addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+            });
+            
+            // 鼠标离开时恢复轮播
+            slider.parentElement.addEventListener('mouseleave', () => {
+                slideInterval = startAutoSlide();
+            });
+            
+            // 触摸事件处理
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            slider.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                clearInterval(slideInterval);
+            });
+            
+            slider.addEventListener('touchmove', (e) => {
+                touchEndX = e.touches[0].clientX;
+            });
+            
+            slider.addEventListener('touchend', () => {
+                const difference = touchStartX - touchEndX;
+                if (Math.abs(difference) > 50) { // 最小滑动距离
+                    if (difference > 0) {
+                        showSlide(currentSlide + 1);
+                    } else {
+                        showSlide(currentSlide - 1);
+                    }
+                }
+                slideInterval = startAutoSlide();
+            });
+            
+            // 初始显示第一张
+            showSlide(0);
+            
+            // 页面隐藏时清除定时器
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    clearInterval(slideInterval);
+                } else {
+                    slideInterval = startAutoSlide();
+                }
+            });
+        }
+
+        // 创建订单
+        function createOrder(itemId, itemName, totalAmount, itemImage, marketType = 0, teamId = null, activityId = null) {
+            const openid = isLogin();
+            if (!openid) return;
+            
+            const requestBody = {
+                userId: openid,
+                itemId: itemId,
+                activityId: activityId,  // 添加活动ID
+                marketType: marketType,
+                teamId: teamId  // 拼团ID，没有则为null
+            };
+            
+            const url = "/api/pay/order/create";
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': openid
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(json => {
+                if (json.code === "0000") {
+                    var formHtml = json.data;
+                    document.body.innerHTML += formHtml;
+                    document.forms[0].submit();
+                } else {
+                    console.error('错误:', json.info);
+                    alert('创建订单失败: ' + json.info);
+                }
+            })
+            .catch(error => {
+                console.error('错误:', error);
+                alert('网络错误，请稍后重试');
+            });
+        }
+
+        // 显示全部拼团模态框
+        function showAllTeamsModal(itemId, groupPrice) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'teams-modal-overlay';
+            
+            modalOverlay.innerHTML = `
+                <div class="teams-modal">
+                    <div class="teams-modal-header">
+                        <div class="teams-modal-title">全部拼团</div>
+                        <button class="teams-modal-close">&times;</button>
+                    </div>
+                    <div class="teams-modal-body">
+                        <div class="teams-list">
+                            <div class="loading-teams">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modalOverlay);
+            
+            // 关闭模态框
+            modalOverlay.querySelector('.teams-modal-close').addEventListener('click', () => {
+                modalOverlay.remove();
+            });
+            
+            // 点击背景关闭模态框
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.remove();
+                }
+            });
+            
+            // 获取全部拼团数据
+            const openid = isLogin();
+            if (!openid) return;
+            
+            fetch('/api/v1/gbm/index/query_all_team', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': openid
+                },
+                body: JSON.stringify({ itemId: itemId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const teamsContainer = modalOverlay.querySelector('.teams-list');
+                
+                if (data.code === '0000' && data.data && data.data.teams) {
+                    renderTeams(data.data.teams, teamsContainer, (team) => {
+                        modalOverlay.remove();
+                        // 参与拼团，传入teamId和activityId
+                        createOrder(itemId, itemName, groupPrice, itemImage, 1, team.teamId, data.data.activityId);
+                    });
+                } else {
+                    teamsContainer.innerHTML = '<div class="no-teams">获取拼团数据失败</div>';
+                }
+            })
+            .catch(error => {
+                console.error('获取全部拼团数据失败:', error);
+                const teamsContainer = modalOverlay.querySelector('.teams-list');
+                teamsContainer.innerHTML = '<div class="no-teams">获取拼团数据失败，请稍后重试</div>';
+            });
+        }
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查登录状态
+            const openid = isLogin();
+            if (!openid) return;
+            
+            // 获取URL参数
+            const params = getUrlParams();
+            const itemId = params.itemId;
+            const itemName = params.itemName;
+            
+            if (!itemId || !itemName) {
+                alert('参数错误，即将返回首页');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // 获取商品拼团配置信息
+            fetch('/api/v1/gbm/index/query_group_buy_market_config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': openid
+                },
+                body: JSON.stringify({ 
+                    goodsId: itemId,  // 使用goodsId而不是itemId
+                    userId: openid,
+                    // channel和source不需要传递
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 隐藏加载动画
+                document.querySelector('.loading').style.display = 'none';
+                
+                if (data.info !== '0000' || !data.data) {
+                    alert('获取商品信息失败，即将返回首页');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                const marketConfig = data.data;
+                const goods = marketConfig.goods;
+                const teamStatistic = marketConfig.teamStatistic;
+                
+                // 获取各项数据
+                const discountPrice = goods.discountPrice || 0;
+                const userPartakeCount = teamStatistic.userPartakeCount || 0;
+                const originalPrice = goods.originalPrice || params.amount || 0;
+                const payPrice = goods.payPrice || 0;
+                const teamList = marketConfig.teamList || [];
+                const itemImage = params.image || '';
+                const activityId = marketConfig.activityId; // 获取活动ID
+                
+                // 创建页面内容
+                const groupBuyCard = document.querySelector('.group-buy-card');
+                
+                // 添加页面内容
+                groupBuyCard.innerHTML = `
+                    <!-- 轮播图 -->
+                    <div class="slider-container">
+                        <div class="slider">
+                            <img src="${itemImage}" alt="${itemName}">
+                            <img src="${itemImage}" alt="${itemName}">
+                            <img src="${itemImage}" alt="${itemName}">
+                        </div>
+                        <div class="slider-dots">
+                            <span class="dot active"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- 商品信息 -->
+                    <div class="product-info">
+                        <h2>${itemName}</h2>
+                        <div class="price-info">
+                            <div class="discount-tag">直降 ${discountPrice}元</div>
+                            <div class="buyers-count"><i class="fas fa-fire"></i> ${userPartakeCount}人在抢</div>
+                        </div>
+                        
+                        <div class="price-section">
+                            <div class="price-item">
+                                <div class="price-label">原价</div>
+                                <div class="original-price">¥${originalPrice}</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-label">拼团价</div>
+                                <div class="group-price">¥${payPrice}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 拼团选项 -->
+                    <div class="group-options">
+                        <h3 class="section-title">可参与的拼团 <a href="#" id="viewAllTeams" class="view-all">查看全部</a></h3>
+                        <div class="group-list">
+                            ${teamList.length === 0 ? 
+                                '<div class="no-teams">暂无可参与的拼团</div>' :
+                                renderTeams(teamList.slice(0, 2))}
+                        </div>
+                    </div>
+                    
+                    <!-- 购买按钮 -->
+                    <div class="buy-options">
+                        <button class="buy-alone">
+                            <div class="price">¥${originalPrice}</div>
+                            <div class="label">单独购买</div>
+                        </button>
+                        <button class="buy-group">
+                            <div class="price">¥${payPrice}</div>
+                            <div class="label">开团购买</div>
+                        </button>
+                    </div>
+                `;
+                
+                // 渲染团队列表
+                const groupList = document.querySelector('.group-list');
+                if (groupList) {
+                    renderTeams(teamList, groupList, (team) => {
+                        // 参与拼团，传入teamId和activityId
+                        createOrder(itemId, itemName, payPrice, itemImage, 1, team.teamId, activityId);
+                    });
+                }
+                
+                // 轮播图逻辑
+                initializeSlider();
+                
+                // 查看全部拼团
+                document.getElementById('viewAllTeams').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showAllTeamsModal(itemId, payPrice);
+                });
+                
+                // 开团购买按钮（新开团，teamId为null）
+                document.querySelector('.buy-group').addEventListener('click', function() {
+                    createOrder(itemId, itemName, payPrice, itemImage, 1, null, activityId);
+                });
+                
+                // 单独购买按钮
+                document.querySelector('.buy-alone').addEventListener('click', function() {
+                    createOrder(itemId, itemName, originalPrice, itemImage, 0, null, activityId);
+                });
+            })
+            .catch(error => {
+                console.error('获取商品信息失败:', error);
+                document.querySelector('.loading').style.display = 'none';
+                
+                const groupBuyCard = document.querySelector('.group-buy-card');
+                if (groupBuyCard) {
+                    groupBuyCard.innerHTML = `
+                        <div class="empty-notice">
+                            <p>获取商品信息失败，请稍后重试</p>
+                            <button class="join-btn" style="margin-top: 15px;" onclick="window.location.href='index.html'">返回首页</button>
+                        </div>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

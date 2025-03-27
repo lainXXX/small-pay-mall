@@ -1,8 +1,8 @@
 package com.rem.port;
 
+import com.rem.entity.MarketDiscountEntity;
 import top.javarem.api.dto.LockMarketPayOrderRequestDTO;
-import top.javarem.api.dto.LockMarketPayOrderResponseDTO;
-import top.javarem.api.response.Response;
+import top.javarem.api.dto.SettleMarketPayOrderRequestDTO;
 
 /**
  * @Author: rem
@@ -11,6 +11,8 @@ import top.javarem.api.response.Response;
  */
 public interface IMarketPort {
 
-    Response<LockMarketPayOrderResponseDTO> lockMarketPayOrder(LockMarketPayOrderRequestDTO requestDTO);
+    MarketDiscountEntity lockMarketPayOrder(LockMarketPayOrderRequestDTO requestDTO);
+
+    void settlePayOrder(SettleMarketPayOrderRequestDTO requestDTO);
 
 }

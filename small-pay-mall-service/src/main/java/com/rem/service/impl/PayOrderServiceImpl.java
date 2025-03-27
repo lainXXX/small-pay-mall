@@ -16,6 +16,7 @@ import com.rem.constants.Constants;
 import com.rem.dto.CartDTO;
 import com.rem.dto.PayOrderRes;
 import com.rem.dto.RefundOrderDTO;
+import com.rem.entity.MarketDiscountEntity;
 import com.rem.enums.MarketTypeEnums;
 import com.rem.mapper.PayOrderMapper;
 import com.rem.message.SubscriberMessage;
@@ -31,14 +32,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.javarem.api.dto.LockMarketPayOrderRequestDTO;
-import top.javarem.api.dto.LockMarketPayOrderResponseDTO;
-import top.javarem.api.response.Response;
+import top.javarem.api.dto.SettleMarketPayOrderRequestDTO;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,16 +78,17 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
      * @throws AlipayApiException
      */
     @Override
+    @Transactional(timeout = 500)
     public PayOrderRes createOrder(CartDTO cartDTO) throws AlipayApiException {
 
 //        查询商品是否合法
         Item item = itemService.lambdaQuery()
-                .select(Item::getItemId, Item::getItemName, Item::getItemImage, Item::getAmount, Item::getSource, Item::getChannel)
+                .select(Item::getItemId, Item::getItemName, Item::getItemImage, Item::getAmount, Item::getSource, Item::getChannel, Item::getAmount, Item::getItemImage)
                 .eq(Item::getItemId, cartDTO.getItemId())
                 .one();
         if (item == null) return null;
-//        利用时间戳和随机数生成一个16位的订单号
-        String orderId = System.currentTimeMillis() + RandomStringUtils.randomNumeric(3);
+//        利用时间戳和随机数生成一个12位的订单号
+        String orderId = RandomStringUtils.randomNumeric(12);
         PayOrder order = PayOrder.builder().
                 userId(cartDTO.getUserId()).
                 orderId(orderId).
@@ -94,12 +97,13 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
                 itemImage(item.getItemImage()).
                 totalAmount(item.getAmount()).
                 payAmount(item.getAmount()).
+                source(item.getSource()).
+                channel(item.getChannel()).
                 createTime(LocalDateTime.now()).
                 updateTime(LocalDateTime.now()).
                 status(Constants.OrderStatusEnum.CREATE.getCode()).
                 build();
-        this.save(order);
-        Response<LockMarketPayOrderResponseDTO> lockOrderResponse = null;
+        MarketDiscountEntity marketDiscountEntity = null;
         if (MarketTypeEnums.GROUP_BUYING.getCode().equals(cartDTO.getMarketType())) {
             //        对接拼团系统锁单
             LockMarketPayOrderRequestDTO requestDTO = new LockMarketPayOrderRequestDTO();
@@ -110,15 +114,12 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
             requestDTO.setSource(item.getSource());
             requestDTO.setChannel(item.getChannel());
             requestDTO.setActivityId(cartDTO.getActivityId());
-            requestDTO.setNotifyUrl("http");
-            lockOrderResponse = marketPort.lockMarketPayOrder(requestDTO);
-            if ("0001".equals(lockOrderResponse.getCode())) return null;
-            log.info("对接拼团系统成功 response:{}", lockOrderResponse);
-        }
-
-
+            requestDTO.setNotifyUrl("http://127.0.0.1:8080/pay/group_buying_notify");
+            marketDiscountEntity = marketPort.lockMarketPayOrder(requestDTO);
+            }
+        this.save(order);
 //        在创建订单 也就是save()后 执行doPay()方法可能失败 就会存在掉单 后续可以通过轮询支付状态为CREATE的订单重新发起支付
-        AlipayTradePagePayResponse response = doPay(orderId, cartDTO.getTotalAmount(), lockOrderResponse.getData(), cartDTO.getItemName());
+        AlipayTradePagePayResponse response = doPay(orderId, item.getAmount(), marketDiscountEntity, item.getItemName());
 //        获取支付宝表单页面url
         String payUrl = response.getBody();
         this.lambdaUpdate().set(PayOrder::getOrderTime, LocalDateTime.now()).set(PayOrder::getPayUrl, payUrl).set(PayOrder::getUpdateTime, LocalDateTime.now()).set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_WAIT.getCode()).eq(PayOrder::getOrderId, orderId).update();
@@ -134,17 +135,17 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
      */
     @Override
     public String payNotify(HttpServletRequest request) throws AlipayApiException {
+
         if (!request.getParameter("trade_status").equals("TRADE_SUCCESS")) {
             return "false";
         }
-
         Map<String, String> params = new HashMap<>();
         Map<String, String[]> requestParams = request.getParameterMap();
         for (String name : requestParams.keySet()) {
             params.put(name, request.getParameter(name));
         }
 
-        String tradeNo = params.get("out_trade_no");
+        String outTradeNo = params.get("out_trade_no");
         String gmtPayment = params.get("gmt_payment");
         String alipayTradeNo = params.get("trade_no");
 
@@ -155,10 +156,24 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
         if (!checkSignature) {
             return "false";
         }
-//        修改状态
-        this.lambdaUpdate().set(PayOrder::getPayTime, LocalDateTime.now()).set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_SUCCESS.getCode()).set(PayOrder::getUpdateTime, LocalDateTime.now()).eq(PayOrder::getOrderId, tradeNo).update();
 
-        redisTemplate.convertAndSend("pay_success", tradeNo); // 发布消息到 "myChannel"
+        PayOrder payOrder = this.lambdaQuery().select(PayOrder::getOrderId, PayOrder::getUserId, PayOrder::getMarketType, PayOrder::getChannel, PayOrder::getSource)
+                .eq(PayOrder::getOrderId, outTradeNo)
+                .one();
+        if (payOrder == null) return null;
+        if (MarketTypeEnums.GROUP_BUYING.getCode().equals(payOrder.getMarketType())) {
+            SettleMarketPayOrderRequestDTO requestDTO = new SettleMarketPayOrderRequestDTO();
+            requestDTO.setUserId(payOrder.getUserId());
+            requestDTO.setOutTradeNo(outTradeNo);
+            requestDTO.setChannel(payOrder.getChannel());
+            requestDTO.setSource(payOrder.getSource());
+            requestDTO.setOutTradeTime(new Date());
+            log.info("支付宝回调- 拼团营销类型 结算订单");
+            marketPort.settlePayOrder(requestDTO);
+        }
+//        修改状态
+        this.lambdaUpdate().set(PayOrder::getPayTime, LocalDateTime.now()).set(PayOrder::getStatus, Constants.OrderStatusEnum.PAY_SUCCESS.getCode()).set(PayOrder::getUpdateTime, LocalDateTime.now()).eq(PayOrder::getOrderId, outTradeNo).update();
+        redisTemplate.convertAndSend("pay_success", outTradeNo);
         return "success";
     }
 
@@ -167,18 +182,18 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
      *
      * @param orderId
      * @param totalAmount
-     * @param responseDTO
+     * @param marketDiscountEntity
      * @param itemName
      * @return
      * @throws AlipayApiException
      */
-    public AlipayTradePagePayResponse doPay(String orderId, BigDecimal totalAmount, LockMarketPayOrderResponseDTO responseDTO, String itemName) throws AlipayApiException {
+    public AlipayTradePagePayResponse doPay(String orderId, BigDecimal totalAmount, MarketDiscountEntity marketDiscountEntity, String itemName) throws AlipayApiException {
 //        创建一个支付请求 设置请求参数
         AlipayTradePagePayRequest alipayRequest = new AlipayTradePagePayRequest();
         alipayRequest.setReturnUrl(alipayConfig.return_url);
         alipayRequest.setNotifyUrl(alipayConfig.notify_url);
 
-        BigDecimal payAmount = responseDTO == null ? totalAmount : responseDTO.getPayPrice();
+        BigDecimal payAmount = marketDiscountEntity == null ? totalAmount : marketDiscountEntity.getPayPrice();
 
 //        创建支付表单页面
         JSONObject bizContent = new JSONObject();
@@ -191,9 +206,9 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
         AlipayTradePagePayResponse response = alipayClient.pageExecute(alipayRequest);
 
         //        校验response参数
-        Integer marketType = responseDTO == null ? MarketTypeEnums.NO_MARKET.getCode() : MarketTypeEnums.GROUP_BUYING.getCode();
+        Integer marketType = marketDiscountEntity == null ? MarketTypeEnums.NO_MARKET.getCode() : MarketTypeEnums.GROUP_BUYING.getCode();
 
-        BigDecimal discountAmount = MarketTypeEnums.GROUP_BUYING.getCode().equals(marketType) ? responseDTO.getDiscountPrice() : BigDecimal.ZERO;
+        BigDecimal discountAmount = MarketTypeEnums.GROUP_BUYING.getCode().equals(marketType) ? marketDiscountEntity.getDiscountPrice() : BigDecimal.ZERO;
 
         this.lambdaUpdate()
                 .set(PayOrder::getDiscountAmount, discountAmount)
@@ -296,6 +311,17 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
                 .set(PayOrder::getStatus, Constants.OrderStatusEnum.DEAL_DONE.getCode())
                 .eq(PayOrder::getOrderId, orderId)
                 .update();
+    }
+
+    @Override
+    public void changeOrderMarketSettlement(List<String> outTradeNoList) {
+
+        this.lambdaUpdate()
+                .set(PayOrder::getStatus, Constants.OrderStatusEnum.DEAL_DONE.getCode())
+                .set(PayOrder::getUpdateTime, LocalDateTime.now())
+                .in(PayOrder::getOrderId, outTradeNoList)
+                .update();
+
     }
 
     /**

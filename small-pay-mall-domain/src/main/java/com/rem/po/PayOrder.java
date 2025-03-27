@@ -1,7 +1,9 @@
 package com.rem.po;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,6 +16,8 @@ import java.time.LocalTime;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PayOrder implements Serializable {
     /**
      * 自增id
@@ -29,6 +33,10 @@ public class PayOrder implements Serializable {
      * 商品id
      */
     private String itemId;
+
+    private String source;
+
+    private String channel;
 
     /**
      * 商品名称

@@ -515,33 +515,9 @@
             const itemName = this.getAttribute('data-itemName');
             const totalAmount = this.getAttribute('data-amount');
             const itemImage = document.querySelector(`.item[data-id="${itemId}"] img`).src;
-            const requestBody = {
-                userId: openid,
-                itemId: itemId,
-                itemName: itemName,
-                totalAmount: totalAmount,
-                itemImage: itemImage
-            };
-            const url1 = "/api/pay/order/create";
-            fetch(url1, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'token': openid
-                },
-                body: JSON.stringify(requestBody)
-            })
-                .then(response => response.json())
-                .then(json => {
-                    if (json.code === "0000") {
-                        var formHtml = json.data;
-                        document.body.innerHTML += formHtml;
-                        document.forms[0].submit();
-                    } else {
-                        console.error('Error:', json.info);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            
+            // 跳转到拼团页面，不再直接处理购买逻辑
+            window.location.href = `group-buy.html?itemId=${encodeURIComponent(itemId)}&itemName=${encodeURIComponent(itemName)}&amount=${encodeURIComponent(totalAmount)}&image=${encodeURIComponent(itemImage)}`;
         }
 
         function getCookie(name) {

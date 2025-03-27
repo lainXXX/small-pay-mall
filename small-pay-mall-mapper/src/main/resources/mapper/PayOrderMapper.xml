@@ -8,6 +8,8 @@
             <id property="id" column="id" jdbcType="INTEGER"/>
             <result property="userId" column="user_id" jdbcType="VARCHAR"/>
             <result property="itemId" column="item_id" jdbcType="VARCHAR"/>
+            <result property="source" column="source" jdbcType="VARCHAR"/>
+            <result property="channel" column="channel" jdbcType="VARCHAR"/>
             <result property="itemName" column="item_name" jdbcType="VARCHAR"/>
             <result property="orderId" column="order_id" jdbcType="VARCHAR"/>
             <result property="orderTime" column="order_time" jdbcType="TIMESTAMP"/>
@@ -22,10 +24,4 @@
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,user_id,item_id,
-        item_name,order_id,order_time,
-        total_amount,status,pay_url,
-        pay_time,create_time,update_time
-    </sql>
 </mapper>

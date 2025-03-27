@@ -56,14 +56,16 @@ public class PayListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
 
         String channel = new String(message.getChannel());
+
         String msg = new String(message.getBody(), StandardCharsets.UTF_8);
+        // 如果 msg 是 "\"111\""，去除首尾引号
+        if (msg.startsWith("\"") && msg.endsWith("\"")) {
+            msg = msg.substring(1, msg.length() - 1);
+        }
         if (StringUtils.isBlank(msg)) {
             return;
         }
         String accessToken = redisTemplate.opsForValue().get(wxProperties.getAppID());
-        if (accessToken == null) {
-            return;
-        }
         // 根据不同的频道来决定不同的处理逻辑
         if ("pay_success".equals(channel)) {
             handlePaySuccess(msg, accessToken);
@@ -96,8 +98,10 @@ public class PayListener implements MessageListener {
                 message.getItemName(),
                 message.getAmount().toString(),
                 refundTime.toString());
-        Call<Void> call = wxService.sendMessage(accessToken, refundTemplate);
-        call.execute();
+        if (accessToken != null) {
+            Call<Void> call = wxService.sendMessage(accessToken, refundTemplate);
+            call.execute();
+        }
         log.info("退货成功 订单id : {}", message.getOrderId());
     }
 
@@ -105,6 +109,7 @@ public class PayListener implements MessageListener {
     public void handlePaySuccess(String orderId, String accessToken) throws IOException {
 
         PayOrder order = payOrderService.lambdaQuery()
+                .select(PayOrder::getOrderId, PayOrder::getItemId)
                 .eq(PayOrder::getOrderId, orderId)
                 .one();
         if (order == null) {
@@ -122,8 +127,10 @@ public class PayListener implements MessageListener {
                 order.getTotalAmount().toString(),
                 order.getPayTime().toString()
         );
-        Call<Void> call = wxService.sendMessage(accessToken, wxTemplateDTO);
-        call.execute();
+        if (accessToken != null) {
+            Call<Void> call = wxService.sendMessage(accessToken, wxTemplateDTO);
+            call.execute();
+        }
         log.info("支付成功 订单id : {}", orderId);
     }
 
