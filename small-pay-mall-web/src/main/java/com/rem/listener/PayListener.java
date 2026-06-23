@@ -109,7 +109,7 @@ public class PayListener implements MessageListener {
     public void handlePaySuccess(String orderId, String accessToken) throws IOException {
 
         PayOrder order = payOrderService.lambdaQuery()
-                .select(PayOrder::getOrderId, PayOrder::getItemId)
+                .select(PayOrder::getOrderId, PayOrder::getItemId, PayOrder::getPayAmount, PayOrder::getPayTime)
                 .eq(PayOrder::getOrderId, orderId)
                 .one();
         if (order == null) {
@@ -124,7 +124,7 @@ public class PayListener implements MessageListener {
                 order.getUserId(),
                 pay_template_id,
                 order.getItemName(),
-                order.getTotalAmount().toString(),
+                order.getPayAmount().toString(),
                 order.getPayTime().toString()
         );
         if (accessToken != null) {

@@ -28,10 +28,10 @@ public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements It
 
     @Override
     public List<ItemVO> showItem() {
-        List<ItemVO> itemVOList = redisTemplate.opsForValue().get("pay_mall_items");
-        if (itemVOList != null) return itemVOList;
+//        List<ItemVO> itemVOList = redisTemplate.opsForValue().get("pay_mall_items");
+//        if (itemVOList != null) return itemVOList;
         List<Item> itemList = lambdaQuery().orderByDesc(Item::getAmount).list();
-        itemVOList = itemList.
+        List<ItemVO> itemVOList = itemList.
                 stream().
                 map(item -> {
                     ItemVO itemVO = new ItemVO();
@@ -39,7 +39,7 @@ public class ItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements It
                     return itemVO;
                 }).
                 collect(Collectors.toList());
-        redisTemplate.opsForValue().set("pay_mall_items", itemVOList);
+//        redisTemplate.opsForValue().set("pay_mall_items", itemVOList);
         return itemVOList;
     }
 
